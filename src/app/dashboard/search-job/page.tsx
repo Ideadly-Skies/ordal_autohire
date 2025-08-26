@@ -1,4 +1,5 @@
 import JobCard from "@/components/job-card";
+import { FaSearch } from "react-icons/fa";
 
 export default function Page() {
   return (
@@ -9,8 +10,8 @@ export default function Page() {
           className="border py-1 px-2 w-full md:w-5/8 dark:border-amber-50 rounded-sm"
           placeholder="Search by job, title, company, & skills.."
         />
-        <button className="bg-amber-500 hover:bg-amber-600 hover:cursor-pointer text-white font-bold py-2 px-4 rounded">
-          Search
+        <button className="border hover:bg-grey-200 hover:cursor-pointer font-bold py-2 px-4 rounded">
+          <FaSearch />
         </button>
         <button className="bg-amber-500 hover:bg-amber-600 hover:cursor-pointer text-white font-bold py-2 px-4 rounded">
           Auto-Apply to All
