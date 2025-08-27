@@ -1,11 +1,15 @@
 "use client";
 
-import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
+import { AlertCircleIcon, UploadIcon, XIcon } from "lucide-react";
 
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Spinner } from "./ui/kibo-ui/spinner";
 
 export default function FileUpload() {
+  const [done, setDone] = useState(false);
   const maxSizeMB = 2;
   const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
 
@@ -26,10 +30,36 @@ export default function FileUpload() {
   });
   const previewUrl = files[0]?.preview || null;
   const fileName = files[0]?.file.name || null;
+  const router = useRouter();
+  console.log(fileName);
+
+  useEffect(() => {
+    if (!fileName) return;
+    const showDone = setTimeout(() => {
+      setDone(true);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1000);
+    }, 4000);
+
+    return () => clearTimeout(showDone);
+  }, [fileName]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="relative">
+        {fileName && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl z-50">
+            <Spinner variant={"circle"} color="white" />
+            {done ? (
+              <span className="text-white ml-2 font-medium">CV Uploaded!</span>
+            ) : (
+              <span className="text-white ml-2 font-medium">
+                Analyzing your CV...
+              </span>
+            )}
+          </div>
+        )}
         {/* Drop area */}
         <div
           onDragEnter={handleDragEnter}
@@ -42,13 +72,13 @@ export default function FileUpload() {
           <input
             {...getInputProps()}
             className="sr-only"
-            aria-label="Upload image file"
+            aria-label="Upload CV file"
           />
           {previewUrl ? (
             <div className="absolute inset-0 flex items-center justify-center p-4">
               <img
                 src={previewUrl}
-                alt={files[0]?.file?.name || "Uploaded image"}
+                alt={files[0]?.file?.name || "Uploaded CV"}
                 className="mx-auto max-h-full rounded object-contain"
               />
             </div>
@@ -58,11 +88,11 @@ export default function FileUpload() {
                 className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
                 aria-hidden="true"
               >
-                <ImageIcon className="size-4 opacity-60" />
+                <UploadIcon className="size-4 opacity-60" />
               </div>
-              <p className="mb-1.5 text-sm font-medium">Drop your image here</p>
+              <p className="mb-1.5 text-sm font-medium">Drop your CV here</p>
               <p className="text-muted-foreground text-xs">
-                SVG, PNG, JPG or GIF (max. {maxSizeMB}MB)
+                PDF, DOCX (max. {maxSizeMB}MB)
               </p>
               <Button
                 variant="outline"
@@ -73,7 +103,7 @@ export default function FileUpload() {
                   className="-ms-1 size-4 opacity-60"
                   aria-hidden="true"
                 />
-                Select image
+                Select CV
               </Button>
             </div>
           )}
@@ -85,7 +115,7 @@ export default function FileUpload() {
               type="button"
               className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
               onClick={() => removeFile(files[0]?.id)}
-              aria-label="Remove image"
+              aria-label="Remove CV"
             >
               <XIcon className="size-4" aria-hidden="true" />
             </button>
@@ -108,7 +138,7 @@ export default function FileUpload() {
         role="region"
         className="text-muted-foreground mt-2 text-center text-xs"
       >
-        Single image uploader w/ max size (drop area + button) ∙{" "}
+        Upload your CV to get instant feedback ∙{" "}
         <a
           href="https://github.com/origin-space/originui/tree/main/docs/use-file-upload.md"
           className="hover:text-foreground underline"
