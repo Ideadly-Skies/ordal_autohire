@@ -1,21 +1,9 @@
 "use client";
 
 import * as React from "react";
-import {
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { Bot, Command, Home, LifeBuoy, Search, Send, User } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
+import { NavDashboard } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -45,22 +33,27 @@ const data = {
       url: "#",
       icon: Send,
     },
+    {
+      title: "Homepage",
+      url: "/",
+      icon: Home,
+    },
   ],
-  projects: [
+  dashboardMenu: [
     {
       name: "Profile",
       url: "/dashboard",
-      icon: Frame,
+      icon: User,
     },
     {
       name: "Search Jobs",
       url: "/dashboard/search-job",
-      icon: PieChart,
+      icon: Search,
     },
     {
       name: "Auto Apply",
       url: "/dashboard/auto-apply",
-      icon: Map,
+      icon: Bot,
     },
   ],
 };
@@ -77,8 +70,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">Ordal-Autohire</span>
+                  <span className="truncate text-xs">User Dashboard</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -86,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
+        <NavDashboard dashboardMenu={data.dashboardMenu} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
 
