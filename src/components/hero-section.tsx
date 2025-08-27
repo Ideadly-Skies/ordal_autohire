@@ -7,6 +7,7 @@ import { TextEffect } from "@/components/ui/text-effect";
 import { AnimatedGroup } from "@/components/ui/animated-group";
 import { HeroHeader } from "./header";
 import AvatarGroup from "./avatar-group";
+import { Badge } from "./ui/badge";
 
 const transitionVariants = {
   item: {
@@ -41,16 +42,16 @@ export default function HeroSection() {
           <div className="h-320 -translate-y-87.5 absolute left-0 top-0 w-60 -rotate-45 bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.04)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)]" />
         </div>
         <section>
-          <div className="relative max-w-5xl mx-auto">
-            <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
-            <div className=" px-6 h-screen flex items-center justify-center w-full">
+          <div className="relative max-w-6xl mx-auto flex gap-10 items-center h-screen pt-10">
+            <div className="  absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
+            <div className="flex items-center justify-center w-2/3">
               <div className=" lg:mr-auto lg:mt-0">
                 <div>
                   <TextEffect
                     preset="fade-in-blur"
                     speedSegment={0.3}
                     as="h1"
-                    className="mt-8 max-w-2xl text-balance text-5xl font-medium md:text-6xl lg:mt-16"
+                    className=" max-w-2xl text-balance text-3xl font-medium md:text-6xl"
                   >
                     Land More Interviews
                   </TextEffect>
@@ -107,6 +108,28 @@ export default function HeroSection() {
                   <AvatarGroup />
                 </AnimatedGroup>
               </div>
+            </div>
+            <div className=" rounded-2xl mr-5 relative w-1/2 bg-gradient-to-t from-blue-500/60 to-blue-500/5">
+              <Image
+                src={"/young-business-woman.webp"}
+                alt="Hero Image"
+                width={1000}
+                height={1000}
+                className="w-ffull h-auto -mt-10 aspect-square object-contain"
+              />
+
+              <Badge className="px-5 py-1 absolute top-10 -left-14 bg-blue-400 border rounded-full flex flex-col gap-0 items-start">
+                <h3 className="font-semibold text-sm">Admin Accountant</h3>
+                <p className="text-[10px] opacity-80">Full-time</p>
+              </Badge>
+              <Badge className="px-5 py-1 absolute bottom-12 -right-10 bg-green-600 border rounded-full flex flex-col gap-0 items-start">
+                <h3 className="font-semibold text-xs">Software Enginer</h3>
+                <p className="text-[10px] opacity-80">Full-time</p>
+              </Badge>
+              <Badge className="px-5 py-1 absolute bottom-20 left-4 bg-orange-600 border rounded-full flex flex-col gap-0 items-start">
+                <h3 className="font-semibold text-xs">Front-End Developer</h3>
+                <p className="text-[10px] opacity-80">Remote</p>
+              </Badge>
             </div>
           </div>
         </section>
