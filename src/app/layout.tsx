@@ -32,10 +32,21 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
+          {/* Dreamy Sky Pink Glow */}
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `
+        radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 90%),
+        radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
+            }}
+          />
+          {/* Your Content/Components */}
+
           {children}
           <AnimatedThemeToggler className="fixed bottom-6 right-6" />
         </ThemeProvider>
