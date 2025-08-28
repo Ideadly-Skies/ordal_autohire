@@ -31,44 +31,58 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
+// 🔹 Schema validasi dengan Zod
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  accountType: z.enum(["jobseeker", "employer"], {
-    error: "Please select an account type",
-  }),
+  accountType: z.enum(["jobseeker", "employer"]),
 });
+
+// 🔹 Type inference dari schema
+type RegisterFormValues = z.infer<typeof formSchema>;
 
 export function RegisterForm() {
   const router = useRouter();
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<RegisterFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      accountType: undefined,
+      accountType: "jobseeker",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: RegisterFormValues) {
     setIsLoading(true);
     try {
-      await register(
+      const result = await register(
         values.name,
         values.email,
         values.password,
         values.accountType
       );
-      router.push("/dashboard");
+
+      if (!result.success) {
+        toast.error(result?.message || ""); // ✅ tampilkan error di toast
+        return;
+      }
+
+      toast.success("Account created successfully!");
+      if (values.accountType === "employer") {
+        router.push("/dashboard/employer");
+      } else {
+        router.push("/dashboard/jobseeker");
+      }
     } catch (error) {
       console.error(error);
-      // Show error message to user
+      // TODO: tampilkan error ke user
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +101,7 @@ export function RegisterForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-3">
+                {/* Full Name */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -100,6 +115,8 @@ export function RegisterForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -113,6 +130,8 @@ export function RegisterForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Password */}
                 <FormField
                   control={form.control}
                   name="password"
@@ -126,6 +145,8 @@ export function RegisterForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Account Type */}
                 <FormField
                   control={form.control}
                   name="accountType"
@@ -134,7 +155,7 @@ export function RegisterForm() {
                       <FormLabel>Account Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -153,6 +174,8 @@ export function RegisterForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Buttons */}
                 <div className="flex flex-col gap-2 mt-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating account..." : "Create Account"}
@@ -162,6 +185,8 @@ export function RegisterForm() {
                   </Button>
                 </div>
               </div>
+
+              {/* Link to login */}
               <div className="mt-4 text-center text-sm">
                 Already have an account?{" "}
                 <Link

@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchJobseeker } from "@/lib/profile";
 import { Jobseeker } from "@/lib/jobseeker";
-
-const DEFAULT_USER_ID = process.env.NEXT_PUBLIC_DEFAULT_USER_ID || "USER_001";
+import { useAuth } from "@/context/auth-context";
 
 export default function ProfileContent() {
+  const { user, isLoading } = useAuth();
+
+  const DEFAULT_USER_ID = user?.id || "";
   const [data, setData] = useState<Jobseeker | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isLoading);
 
   useEffect(() => {
     let on = true;
@@ -98,7 +100,9 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">No skills yet.</div>
+              <div className="text-xs text-muted-foreground">
+                No skills yet.
+              </div>
             )}
           </CardContent>
         </Card>
@@ -130,7 +134,9 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">No interests yet.</div>
+              <div className="text-xs text-muted-foreground">
+                No interests yet.
+              </div>
             )}
           </CardContent>
         </Card>

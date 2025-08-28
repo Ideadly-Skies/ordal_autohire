@@ -31,7 +31,6 @@ export default function FileUpload() {
   const previewUrl = files[0]?.preview || null;
   const fileName = files[0]?.file.name || null;
   const router = useRouter();
-  console.log(fileName);
 
   useEffect(() => {
     if (!fileName) return;
