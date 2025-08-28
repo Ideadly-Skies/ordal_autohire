@@ -5,13 +5,18 @@ import { JobSearchToolbar } from "@/components/jobs/job-search-toolbar";
 
 export default async function Page({
   searchParams,
-}: { searchParams?: { q?: string } }) {
+}: {
+  searchParams?: { q?: string };
+}) {
   const q = (searchParams?.q ?? "").trim().toLowerCase();
 
   const jobs = await listJobs({ limit: 30, status: "open", order: "new" });
+  console.log(jobs);
   const filtered = q
     ? jobs.filter((j) => {
-        const hay = `${j.title} ${j.company} ${j.location ?? ""} ${j.description ?? ""}`.toLowerCase();
+        const hay = `${j.title} ${j.company} ${j.location ?? ""} ${
+          j.description ?? ""
+        }`.toLowerCase();
         return hay.includes(q);
       })
     : jobs;
