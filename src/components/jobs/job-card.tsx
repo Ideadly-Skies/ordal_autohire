@@ -22,7 +22,7 @@ export default function JobCard({ job }: Props) {
       )}
       {job.description && (
         <p className="text-sm line-clamp-3 flex items-center gap-1">
-          <PiHandbag className="inline text-2xl" /> {job.description}
+          <PiHandbag className="inline text-xl grow-0" /> {job.description}
         </p>
       )}
       {(job.salary_min || job.salary_max) && (
@@ -33,7 +33,7 @@ export default function JobCard({ job }: Props) {
         </div>
       )}
       <Link
-        href="/dashboard/search-job"
+        href={`/dashboard/search-job/${job.id}`}
         className="bg-zinc-500 hover:bg-zinc-700 hover:cursor-pointer text-white font-bold py-1 px-2 rounded inline-flex items-center justify-center absolute bottom-2 right-2"
       >
         Detail

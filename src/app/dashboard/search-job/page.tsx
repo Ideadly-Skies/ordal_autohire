@@ -1,17 +1,27 @@
-// src/app/dashboard/search-job/page.tsx (Server Component)
 import JobCard from "@/components/jobs/job-card";
-import { listJobs } from "@/lib/jobs";
+import { listJobs, getJobsCount } from "@/lib/jobs";
 import { JobSearchToolbar } from "@/components/jobs/job-search-toolbar";
+import Pagination from "@/components/jobs/pagination";
+
+const PAGE_LIMIT = 12;
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: { q?: string };
+  searchParams?: { q?: string; page?: string };
 }) {
   const q = (searchParams?.q ?? "").trim().toLowerCase();
+  const page = parseInt(searchParams?.page ?? "1", 10);
 
-  const jobs = await listJobs({ limit: 30, status: "open", order: "new" });
-  console.log(jobs);
+  const jobs = await listJobs({
+    limit: PAGE_LIMIT,
+    status: "open",
+    order: "new",
+    page,
+  });
+  const totalJobs = await getJobsCount({ status: "open" });
+  const totalPages = Math.ceil(totalJobs / PAGE_LIMIT);
+
   const filtered = q
     ? jobs.filter((j) => {
         const hay = `${j.title} ${j.company} ${j.location ?? ""} ${
@@ -35,6 +45,8 @@ export default async function Page({
           </div>
         )}
       </div>
+
+      <Pagination currentPage={page} totalPages={totalPages} query={q} />
     </>
   );
 }
