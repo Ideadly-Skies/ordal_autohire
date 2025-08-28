@@ -1,13 +1,31 @@
-import ProfileContent from "@/components/profile-content";
-import ProfileSidebar from "@/components/profile-sidebar";
+"use client";
 
-export default function ProfilePage() {
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { Spinner } from "@/components/ui/kibo-ui/spinner";
+
+export default function DashboardIndexPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.replace("/login");
+      } else if (user.accountType === "jobseeker") {
+        router.replace("/dashboard/jobseeker");
+      } else if (user.accountType === "employer") {
+        router.replace("/dashboard/employer");
+      } else {
+        router.replace("/"); // fallback
+      }
+    }
+  }, [user, isLoading, router]);
+
   return (
-    <div className="min-h-screen ">
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto gap-4 lg:gap-6">
-        <ProfileSidebar />
-        <ProfileContent />
-      </div>
+    <div className="h-screen w-full flex justify-center items-center">
+      <Spinner />
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { LogoutButton } from "./logout-button";
 
 const menuItems = [
   { name: "Ai Tools", href: "#link" },
@@ -22,6 +24,8 @@ export const HeroHeader = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const { user } = useAuth();
   return (
     <header>
       <nav
@@ -83,17 +87,31 @@ export const HeroHeader = () => {
                     </li>
                   ))}
                 </ul>
-
-                <Button
-                  asChild
-                  variant="default"
-                  size="sm"
-                  className={cn(isScrolled && "lg:hidden")}
-                >
-                  <Link href="/dashboard">
-                    <span>Dashboard</span>
-                  </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    asChild
+                    variant="default"
+                    size="sm"
+                    className={cn(isScrolled && "lg:hidden")}
+                  >
+                    {user ? (
+                      <Link
+                        href={
+                          user.accountType === "employer"
+                            ? "/dashboard/employer"
+                            : "/dashboard/jobseeker"
+                        }
+                      >
+                        <span>Dashboard</span>
+                      </Link>
+                    ) : (
+                      <Link href="/login">
+                        <span>Sign In</span>
+                      </Link>
+                    )}
+                  </Button>
+                  {user && <LogoutButton variant="destructive" />}
+                </div>
               </div>
             </div>
           </div>

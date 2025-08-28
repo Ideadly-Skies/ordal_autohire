@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Bot, Command, Home, LifeBuoy, Search, Send, User } from "lucide-react";
+import { Command } from "lucide-react";
 
+import { useAuth } from "@/context/auth-context";
 import { NavDashboard } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -15,50 +16,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-    {
-      title: "Homepage",
-      url: "/",
-      icon: Home,
-    },
-  ],
-  dashboardMenu: [
-    {
-      name: "Profile",
-      url: "/dashboard",
-      icon: User,
-    },
-    {
-      name: "Search Jobs",
-      url: "/dashboard/search-job",
-      icon: Search,
-    },
-    {
-      name: "Auto Apply",
-      url: "/dashboard/auto-apply",
-      icon: Bot,
-    },
-  ],
-};
+import {
+  jobseekerMenu,
+  employerMenu,
+  secondaryMenu,
+} from "@/config/sidebar-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
+
+  const dashboardMenu =
+    user?.accountType === "employer" ? employerMenu : jobseekerMenu;
+  const dashboardTitle =
+    user?.accountType === "employer"
+      ? "Employer Dashboard"
+      : "Joobseeker Dashboard";
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -71,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Ordal-Autohire</span>
-                  <span className="truncate text-xs">User Dashboard</span>
+                  <span className="truncate text-xs">{dashboardTitle}</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -79,12 +52,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavDashboard dashboardMenu={data.dashboardMenu} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavDashboard dashboardMenu={dashboardMenu} />
+        <NavSecondary items={secondaryMenu} className="mt-auto" />
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: user?.name || "",
+            email: user?.email || "",
+            avatar: "https://github.com/shadcn.png",
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
   );
