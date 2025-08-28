@@ -7,6 +7,7 @@ import { TextEffect } from "@/components/ui/text-effect";
 import { AnimatedGroup } from "@/components/ui/animated-group";
 import AvatarGroup from "./avatar-group";
 import { Badge } from "./ui/badge";
+import { UploadButton } from "./upload-button";
 
 const transitionVariants = {
   item: {
@@ -93,48 +94,58 @@ export default function HeroSection() {
                 }}
                 className="mt-8 sm:mt-10 lg:mt-12 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-5"
               >
-                <Button
-                  variant="default"
-                  asChild
-                  className="rounded-full px-10"
-                >
-                  <Link href="/upload" className="flex items-center gap-2">
-                    <span className="text-nowrap">Start now for free</span>
-                    <ArrowRight />
-                  </Link>
-                </Button>
+                <UploadButton />
                 <AvatarGroup />
               </AnimatedGroup>
             </div>
           </div>
 
           {/* Gambar */}
-          <div className="hidden sm:flex rounded-2xl relative w-full max-w-md sm:max-w-lg lg:w-2/5 lg:max-w-none bg-gradient-to-t from-blue-500/60 to-blue-500/5 mx-auto lg:mr-5">
-            <Image
-              src={"/young-business-woman.webp"}
-              alt="Hero Image"
-              width={1000}
-              height={1000}
-              className="w-full h-auto -mt-6 sm:-mt-8 lg:-mt-10 aspect-square object-contain"
-            />
+          <AnimatedGroup
+            variants={{
+              container: {
+                visible: {
+                  transition: {
+                    staggerChildren: 0.05,
+                    delayChildren: 0.75,
+                  },
+                },
+              },
+              ...transitionVariants,
+            }}
+            className=" hidden lg:flex items-center justify-end w-2/5 h-full"
+          >
+            <div className="relative w-full max-w-xl bg-gradient-to-t from-blue-500/60 to-blue-50 rounded-2xl">
+              <Image
+                src={"/young-business-woman.webp"}
+                alt="Hero Image"
+                width={1000}
+                height={1000}
+                className="w-full h-auto -mt-6 sm:-mt-8 lg:-mt-10 aspect-square object-contain"
+              />
 
-            <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute top-6 sm:top-8 lg:top-10 -left-8 sm:-left-10 lg:-left-10 bg-blue-400 border rounded-full flex flex-col gap-0 items-start">
-              <h3 className="font-semibold text-xs sm:text-sm">
-                Admin Accountant
-              </h3>
-              <p className="text-[9px] sm:text-[10px] opacity-80">Full-time</p>
-            </Badge>
+              <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute top-6 sm:top-8 lg:top-10 -left-8 sm:-left-10 lg:-left-10 bg-blue-400 border rounded-full flex flex-col gap-0 items-start text-white">
+                <h3 className="font-semibold text-xs sm:text-sm">
+                  Admin Accountant
+                </h3>
+                <p className="text-[9px] sm:text-[10px] opacity-80">
+                  Full-time
+                </p>
+              </Badge>
 
-            <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute bottom-8 sm:bottom-10 lg:bottom-12 -right-6 sm:-right-8 lg:-right-10 bg-green-600 border rounded-full flex flex-col gap-0 items-start">
-              <h3 className="font-semibold text-xs">Software Engineer</h3>
-              <p className="text-[9px] sm:text-[10px] opacity-80">Full-time</p>
-            </Badge>
+              <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute bottom-8 sm:bottom-10 lg:bottom-12 -right-6 sm:-right-8 lg:-right-10 bg-green-600 border rounded-full flex flex-col gap-0 items-start text-white">
+                <h3 className="font-semibold text-xs">Software Engineer</h3>
+                <p className="text-[9px] sm:text-[10px] opacity-80">
+                  Full-time
+                </p>
+              </Badge>
 
-            <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute bottom-16 sm:bottom-18 lg:bottom-20 left-2 sm:left-3 lg:left-4 bg-orange-600 border rounded-full flex flex-col gap-0 items-start">
-              <h3 className="font-semibold text-xs">Front-End Developer</h3>
-              <p className="text-[9px] sm:text-[10px] opacity-80">Remote</p>
-            </Badge>
-          </div>
+              <Badge className="px-3 sm:px-4 lg:px-5 py-1 absolute bottom-16 sm:bottom-18 lg:bottom-20 left-2 sm:left-3 lg:left-4 bg-orange-600 border rounded-full flex flex-col gap-0 items-start text-white">
+                <h3 className="font-semibold text-xs">Front-End Developer</h3>
+                <p className="text-[9px] sm:text-[10px] opacity-80">Remote</p>
+              </Badge>
+            </div>
+          </AnimatedGroup>
         </div>
       </section>
     </main>
