@@ -1,4 +1,3 @@
-// src/components/profile-content.tsx
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -43,13 +42,13 @@ export default function ProfileContent() {
 
   return (
     <div className="flex-1">
-      <div className="space-y-5">
+      <div className="space-y-6">
         {/* About Section */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-1 lg:pb-2">
-            <CardTitle className="text-xl lg:text-2xl font-semibold">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium">
               {loading ? (
-                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-7 w-48" />
               ) : name ? (
                 `About ${name}`
               ) : (
@@ -65,8 +64,8 @@ export default function ProfileContent() {
                 <Skeleton className="h-4 w-1/2" />
               </div>
             ) : (
-              <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                {about || "No summary yet."}
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {about || "No information added yet."}
               </p>
             )}
           </CardContent>
@@ -74,8 +73,8 @@ export default function ProfileContent() {
 
         {/* Skills Section */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium">
               {loading ? <Skeleton className="h-7 w-24" /> : "Skills"}
             </CardTitle>
           </CardHeader>
@@ -100,17 +99,17 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">
-                No skills yet.
-              </div>
+              <p className="text-sm text-muted-foreground">
+                No information added yet.
+              </p>
             )}
           </CardContent>
         </Card>
 
         {/* Interests Section */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium">
               {loading ? <Skeleton className="h-7 w-32" /> : "Interests"}
             </CardTitle>
           </CardHeader>
@@ -134,17 +133,17 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">
-                No interests yet.
-              </div>
+              <p className="text-sm text-muted-foreground">
+                No information added yet.
+              </p>
             )}
           </CardContent>
         </Card>
 
         {/* Recent Activity Section */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium">
               {loading ? <Skeleton className="h-7 w-40" /> : "Recent Activity"}
             </CardTitle>
           </CardHeader>
@@ -155,9 +154,9 @@ export default function ProfileContent() {
                 <Skeleton className="h-4 w-2/3" />
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">
-                Activity feed not wired yet.
-              </div>
+              <p className="text-sm text-muted-foreground">
+                No information added yet.
+              </p>
             )}
           </CardContent>
         </Card>
