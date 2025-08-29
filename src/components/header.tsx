@@ -48,11 +48,6 @@ export const HeroHeader = () => {
               >
                 <Logo />
               </Link>
-              {user?.personal_info.name && (
-                <span className="hidden lg:inline-block text-sm font-medium">
-                  Welcome, {user.personal_info.name}
-                </span>
-              )}
 
               <button
                 onClick={() => setMenuState(!menuState)}

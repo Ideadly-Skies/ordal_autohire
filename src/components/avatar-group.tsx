@@ -27,8 +27,8 @@ export default function AvatarGroup() {
           alt="Avatar 04"
         />
         <Button
-          variant="secondary"
-          className="bg-secondary text-muted-foreground ring-background hover:bg-secondary hover:text-foreground flex size-10 items-center justify-center rounded-full text-xs ring-2"
+          variant="default"
+          className=" text-white flex size-10 items-center justify-center rounded-full text-xs ring-2"
           size="icon"
         >
           +99
