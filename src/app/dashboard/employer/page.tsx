@@ -37,13 +37,6 @@ export default function EmployerProfilePage() {
     phone: "+1 (555) 123-4567",
     about:
       "Leading technology solutions provider with over 10 years of experience in delivering innovative software solutions to enterprises worldwide.",
-    benefits: [
-      "Health Insurance",
-      "401(k) Plan",
-      "Remote Work",
-      "Flexible Hours",
-      "Professional Development",
-    ],
     openPositions: [
       {
         id: 1,
@@ -122,17 +115,6 @@ export default function EmployerProfilePage() {
                   <p className="text-sm text-muted-foreground">
                     {companyData.about}
                   </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Benefits</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {companyData.benefits.map((benefit) => (
-                      <Badge key={benefit} variant="secondary">
-                        {benefit}
-                      </Badge>
-                    ))}
-                  </div>
                 </div>
               </CardContent>
             </Card>

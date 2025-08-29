@@ -21,6 +21,7 @@ import { db } from "@/config/firebase";
 import { Job } from "@/lib/jobs";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { MdVerified } from "react-icons/md";
 
 export default async function JobDetailsPage({
   params,
@@ -78,7 +79,7 @@ export default async function JobDetailsPage({
   console.log(job);
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div>
           {/* Button */}
@@ -93,13 +94,13 @@ export default async function JobDetailsPage({
               </Link>
             </Button>
           </div>
+
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-5">
             <div className="lg:col-span-2 space-y-3 lg:space-y-5">
-              {/* Job Header Card - Parallel Layout */}
+              {/* Job Header Card */}
               <Card>
                 <CardContent className="p-6">
-                  {/* Top Row - Company Info and Actions */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
@@ -108,19 +109,15 @@ export default async function JobDetailsPage({
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                        <h1 className="text-2xl font-bold">
                           {job?.title || "Job Title"}
                         </h1>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-semibold text-blue-600">
+                          <span className="text-lg text-blue-600">
                             {job?.poster_name || "Company Name"}
                           </span>
-                          <Badge
-                            variant="secondary"
-                            className="bg-blue-100 text-blue-800"
-                          >
-                            ✓
-                          </Badge>
+
+                          <MdVerified className="inline text-green-600" />
                         </div>
                       </div>
                     </div>
@@ -134,8 +131,8 @@ export default async function JobDetailsPage({
                     </div>
                   </div>
 
-                  {/* Job Meta - Single Horizontal Row */}
-                  <div className="flex items-center gap-8 mb-4 text-gray-600">
+                  {/* Job Meta */}
+                  <div className="flex items-center gap-8 mb-4">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span className="text-sm">{job?.location}</span>
@@ -151,7 +148,6 @@ export default async function JobDetailsPage({
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
                       <span className="text-sm">
-                        {" "}
                         {job?.salary_min
                           ? `${job.salary_min.toLocaleString()}`
                           : ""}{" "}
@@ -162,8 +158,8 @@ export default async function JobDetailsPage({
                     </div>
                   </div>
 
-                  {/* Bottom Row - Posted Info and Match */}
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  {/* Bottom Row */}
+                  <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -188,7 +184,7 @@ export default async function JobDetailsPage({
                   <CardTitle>Job Description</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 leading-relaxed">
+                  <p className="leading-relaxed">
                     {job?.description || "description"}
                   </p>
                 </CardContent>
@@ -210,9 +206,9 @@ export default async function JobDetailsPage({
                     ].map((requirement, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
-                          <Check className="h-3 w-3 text-green-600" />
+                          <Check className="h-3 w-3 text-green-700" />
                         </div>
-                        <span className="text-gray-700">{requirement}</span>
+                        <span>{requirement}</span>
                       </div>
                     ))}
                   </div>
@@ -237,7 +233,7 @@ export default async function JobDetailsPage({
                         <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
                           <Star className="h-3 w-3 text-orange-400" />
                         </div>
-                        <span className="text-gray-700">{benefit}</span>
+                        <span>{benefit}</span>
                       </div>
                     ))}
                   </div>
@@ -246,14 +242,11 @@ export default async function JobDetailsPage({
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-3 lg:space-y-5 ">
-              {/* Apply Section */}
+            <div className="space-y-3 lg:space-y-5">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Apply for this job</CardTitle>
-                  <p className="text-sm text-gray-500">
-                    Recruiter active 1 minute ago
-                  </p>
+                  <p className="text-sm">Recruiter active 1 minute ago</p>
                 </CardHeader>
                 <CardContent className="space-y-3 mt-3">
                   <Button className="w-full">
@@ -264,20 +257,9 @@ export default async function JobDetailsPage({
                       Apply Now
                     </Link>
                   </Button>
-                  {/* 
-                  <div className="text-center pt-2">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <Star className="h-4 w-4 fill-orange-400 text-orange-400" />
-                      <span className="font-bold text-lg">92%</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Match with your profile
-                    </p>
-                  </div> */}
                 </CardContent>
               </Card>
 
-              {/* About Company */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
@@ -293,12 +275,10 @@ export default async function JobDetailsPage({
                     </Avatar>
                     <div>
                       <h3 className="font-semibold">{job?.poster_name}</h3>
-                      <p className="text-sm text-gray-600">
-                        Technology Company
-                      </p>
+                      <p className="text-sm">Technology Company</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700 mb-4">
+                  <p className="text-sm mb-4">
                     ASTRO is a leading technology company specializing in
                     innovative solutions for supply chain and inventory
                     management.
@@ -309,7 +289,6 @@ export default async function JobDetailsPage({
                 </CardContent>
               </Card>
 
-              {/* Similar Jobs */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Similar Jobs</CardTitle>
@@ -321,10 +300,8 @@ export default async function JobDetailsPage({
                         <h4 className="font-medium text-sm">
                           Inventory Manager
                         </h4>
-                        <p className="text-xs text-gray-600">
-                          TechCorp • Jakarta
-                        </p>
-                        <p className="text-xs text-gray-500">2d ago</p>
+                        <p className="text-xs">TechCorp • Jakarta</p>
+                        <p className="text-xs">2d ago</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-orange-400 text-orange-400" />
@@ -337,10 +314,8 @@ export default async function JobDetailsPage({
                         <h4 className="font-medium text-sm">
                           Supply Chain Specialist
                         </h4>
-                        <p className="text-xs text-gray-600">
-                          LogiTech • Bandung
-                        </p>
-                        <p className="text-xs text-gray-500">3d ago</p>
+                        <p className="text-xs">LogiTech • Bandung</p>
+                        <p className="text-xs">3d ago</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-orange-400 text-orange-400" />
