@@ -38,14 +38,18 @@ export default function Chat({ userId, setIsMinimized, setChatEnded }) {
     chatBaseUrl: baseUrl,
   });
 
+  // function getConfigUrl() {
+  //   const currentScript = document.currentScript || (() => {
+  //     const script = document.getElementById("chat-widget-script");
+  //     return script;
+  //   })();
+  //   if (!currentScript) return "config.json";
+  //   const base = currentScript?.src || "";
+  //   return new URL("config.json", base).href;
+  // }
   function getConfigUrl() {
-    const currentScript = document.currentScript || (() => {
-      const script = document.getElementById("chat-widget-script");
-      return script;
-    })();
-    if (!currentScript) return "config.json";
-    const base = currentScript?.src || "";
-    return new URL("config.json", base).href;
+    // Always fetch from the site root, works on any route
+    return new URL("/config.json", window.location.origin).toString();
   }
 
   useEffect(() => {

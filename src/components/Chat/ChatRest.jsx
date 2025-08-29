@@ -36,12 +36,16 @@ export default function ChatRest({ userId, setIsMinimized, setChatEnded }) {
   const env = extractEnvFromUserId(userId);
   const processedUserId = extractUserId(userId);
 
+  // function getConfigUrl() {
+  //   const currentScript = document.currentScript || (() => {
+  //     return document.getElementById("chat-widget-script");
+  //   })();
+  //   if (!currentScript) return "config.json";
+  //   return new URL("config.json", currentScript?.src || "").href;
+  // }
   function getConfigUrl() {
-    const currentScript = document.currentScript || (() => {
-      return document.getElementById("chat-widget-script");
-    })();
-    if (!currentScript) return "config.json";
-    return new URL("config.json", currentScript?.src || "").href;
+    // Always fetch from the site root, works on any route
+    return new URL("/config.json", window.location.origin).toString();
   }
 
   const connect = async () => {
