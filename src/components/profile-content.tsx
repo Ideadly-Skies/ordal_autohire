@@ -1,39 +1,58 @@
+// src/app/dashboard/jobseeker/profile-content.tsx
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchJobseeker } from "@/lib/profile";
-import { Jobseeker } from "@/lib/jobseeker";
 import { useAuth } from "@/context/auth-context";
+import type { Jobseeker } from "@/lib/jobseeker";
+
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app";
+
+const app = getApps().length
+  ? getApps()[0]
+  : initializeApp({
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+    });
+const db = getFirestore(app);
 
 export default function ProfileContent() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
+  const uid = user?.id ?? ""; // or user?.uid depending on your context
 
-  const DEFAULT_USER_ID = user?.id || "";
   const [data, setData] = useState<Jobseeker | null>(null);
-  const [loading, setLoading] = useState(isLoading);
+  const [loading, setLoading] = useState(true);
 
+  // 🔴 remove the one-time fetch; use a live listener instead
   useEffect(() => {
-    let on = true;
-    fetchJobseeker(DEFAULT_USER_ID).then((d) => {
-      if (on) {
-        setData(d);
+    if (!uid) return;
+
+    setLoading(true);
+    const unsub = onSnapshot(
+      doc(db, "jobseekers", uid),
+      (snap) => {
+        setData((snap.data() as Jobseeker) ?? null);
+        console.log(`snap data from profile content: ${snap.data()}`)
+        setLoading(false);
+      },
+      (err) => {
+        console.error("profile onSnapshot error", err);
         setLoading(false);
       }
-    });
-    return () => {
-      on = false;
-    };
-  }, []);
+    );
 
-  const about = useMemo(() => {
-    if (!data) return "";
-    // Prefer resume_summary; fallback to background_info.summary
-    return data.resume_summary || data.background_info?.summary || "";
-  }, [data]);
+    return () => unsub();
+  }, [uid]);
 
+  const about = useMemo(
+    () =>
+      data ? data.resume_summary || data.background_info?.summary || "" : "",
+    [data]
+  );
   const skills = data?.skills ?? [];
   const interests = data?.background_info?.interests ?? [];
   const name = `${data?.personal_info?.first_name ?? ""} ${
@@ -43,7 +62,7 @@ export default function ProfileContent() {
   return (
     <div className="flex-1">
       <div className="space-y-6">
-        {/* About Section */}
+        {/* About */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">
@@ -71,7 +90,7 @@ export default function ProfileContent() {
           </CardContent>
         </Card>
 
-        {/* Skills Section */}
+        {/* Skills */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">
@@ -106,7 +125,7 @@ export default function ProfileContent() {
           </CardContent>
         </Card>
 
-        {/* Interests Section */}
+        {/* Interests */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">
@@ -140,7 +159,7 @@ export default function ProfileContent() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity Section */}
+        {/* Recent Activity */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">
