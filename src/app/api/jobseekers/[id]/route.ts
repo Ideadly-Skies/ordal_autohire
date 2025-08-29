@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await ctx.params;
     const docId = decodeURIComponent(id);
-
+ 
     if (!docId) {
       return NextResponse.json({ ok: false, error: "Missing id" }, { status: 400 });
     }
