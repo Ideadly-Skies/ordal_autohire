@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { LogoutButton } from "./logout-button";
 
 const menuItems = [
   { name: "Ai Tools", href: "#link" },
@@ -14,6 +16,7 @@ const menuItems = [
 export const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [userLogin, setUserLogin] = React.useState({ name: "Guest" });
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +25,7 @@ export const HeroHeader = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  const { user } = useAuth();
   return (
     <header>
       <nav
@@ -44,6 +48,11 @@ export const HeroHeader = () => {
               >
                 <Logo />
               </Link>
+              {user?.personal_info.name && (
+                <span className="hidden lg:inline-block text-sm font-medium">
+                  Welcome, {user.personal_info.name}
+                </span>
+              )}
 
               <button
                 onClick={() => setMenuState(!menuState)}
@@ -83,17 +92,31 @@ export const HeroHeader = () => {
                     </li>
                   ))}
                 </ul>
-
-                <Button
-                  asChild
-                  variant="default"
-                  size="sm"
-                  className={cn(isScrolled && "lg:hidden")}
-                >
-                  <Link href="/dashboard">
-                    <span>Dashboard</span>
-                  </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    asChild
+                    variant="default"
+                    size="sm"
+                    className={cn(isScrolled && "lg:hidden")}
+                  >
+                    {user ? (
+                      <Link
+                        href={
+                          user.accountType === "employer"
+                            ? "/dashboard/employer"
+                            : "/dashboard/jobseeker"
+                        }
+                      >
+                        <span>Dashboard</span>
+                      </Link>
+                    ) : (
+                      <Link href="/login">
+                        <span>Sign In</span>
+                      </Link>
+                    )}
+                  </Button>
+                  {user && <LogoutButton variant="destructive" />}
+                </div>
               </div>
             </div>
           </div>

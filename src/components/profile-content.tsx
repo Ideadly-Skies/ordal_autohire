@@ -4,14 +4,17 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fetchJobseeker } from "@/lib/profile";
 import { Jobseeker } from "@/lib/jobseeker";
-
-const DEFAULT_USER_ID = process.env.NEXT_PUBLIC_DEFAULT_USER_ID || "USER_001";
+import { useAuth } from "@/context/auth-context";
 
 export default function ProfileContent() {
+  const { user, isLoading } = useAuth();
+
+  const DEFAULT_USER_ID = user?.id || "";
   const [data, setData] = useState<Jobseeker | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isLoading);
 
   useEffect(() => {
     let on = true;
@@ -21,7 +24,9 @@ export default function ProfileContent() {
         setLoading(false);
       }
     });
-    return () => { on = false; };
+    return () => {
+      on = false;
+    };
   }, []);
 
   const about = useMemo(() => {
@@ -32,7 +37,9 @@ export default function ProfileContent() {
 
   const skills = data?.skills ?? [];
   const interests = data?.background_info?.interests ?? [];
-  const name = `${data?.personal_info?.first_name ?? ""} ${data?.personal_info?.last_name ?? ""}`.trim();
+  const name = `${data?.personal_info?.first_name ?? ""} ${
+    data?.personal_info?.last_name ?? ""
+  }`.trim();
 
   return (
     <div className="flex-1">
@@ -41,24 +48,45 @@ export default function ProfileContent() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-1 lg:pb-2">
             <CardTitle className="text-xl lg:text-2xl font-semibold">
-              {loading ? "About" : name ? `About ${name}` : "About"}
+              {loading ? (
+                <Skeleton className="h-8 w-48" />
+              ) : name ? (
+                `About ${name}`
+              ) : (
+                "About"
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-              {loading ? "Loading profile…" : (about || "No summary yet.")}
-            </p>
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ) : (
+              <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {about || "No summary yet."}
+              </p>
+            )}
           </CardContent>
         </Card>
 
         {/* Skills Section */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">Skills</CardTitle>
+            <CardTitle className="text-lg lg:text-xl font-medium">
+              {loading ? <Skeleton className="h-7 w-24" /> : "Skills"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-xs text-muted-foreground">Loading…</div>
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-28" />
+              </div>
             ) : skills.length ? (
               <div className="flex flex-wrap gap-2">
                 {skills.map((s) => (
@@ -72,19 +100,27 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">No skills yet.</div>
+              <div className="text-xs text-muted-foreground">
+                No skills yet.
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Interests (from background_info) */}
+        {/* Interests Section */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">Interests</CardTitle>
+            <CardTitle className="text-lg lg:text-xl font-medium">
+              {loading ? <Skeleton className="h-7 w-32" /> : "Interests"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-xs text-muted-foreground">Loading…</div>
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-24" />
+              </div>
             ) : interests.length ? (
               <div className="flex flex-wrap gap-2">
                 {interests.map((s) => (
@@ -98,20 +134,31 @@ export default function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-muted-foreground">No interests yet.</div>
+              <div className="text-xs text-muted-foreground">
+                No interests yet.
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Recent Activity – placeholder */}
+        {/* Recent Activity Section */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 lg:pb-3">
-            <CardTitle className="text-lg lg:text-xl font-medium">Recent Activity</CardTitle>
+            <CardTitle className="text-lg lg:text-xl font-medium">
+              {loading ? <Skeleton className="h-7 w-40" /> : "Recent Activity"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-muted-foreground">
-              Activity feed not wired yet.
-            </div>
+            {loading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">
+                Activity feed not wired yet.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

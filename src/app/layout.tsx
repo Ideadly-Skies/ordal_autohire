@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
+import { Toaster } from "react-hot-toast";
+
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/context/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,30 +28,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* Dreamy Sky Pink Glow */}
-          {/* <div
+        <AuthProvider>
+          <ThemeProvider>
+            {/* Dreamy Sky Pink Glow */}
+            {/* <div
             className="absolute inset-0 z-0"
             style={{
               backgroundImage: `
-        radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 90%),
-        radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
-            }}
-          /> */}
-          {/* Your Content/Components */}
-
-          {children}
-          <AnimatedThemeToggler className="fixed bottom-6 right-6" />
-        </ThemeProvider>
+              radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 90%),
+              radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
+              }}
+              /> */}
+            {/* Your Content/Components */}
+            <Toaster />
+            {children}
+            <AnimatedThemeToggler className="fixed bottom-6 right-6" />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
