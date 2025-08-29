@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/auth-context";
 
 interface UploadModalProps {
   open: boolean;
@@ -27,7 +28,8 @@ interface UploadModalProps {
 
 export function UploadModal({ open, onOpenChange }: UploadModalProps) {
   const router = useRouter();
-  const [userId, setUserId] = useState("USER_001");
+  // const [userId, setUserId] = useState("USER_001");
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [skillsMode, setSkillsMode] = useState<"add" | "replace">("add");
   const [isDragging, setIsDragging] = useState(false);
@@ -138,7 +140,7 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
 
     try {
       const fd = new FormData();
-      fd.append("userId", userId.trim());
+      fd.append("userId", user?.id || "");
       fd.append("file", file);
       fd.append("skillsMode", skillsMode);
 

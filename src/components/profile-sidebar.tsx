@@ -8,8 +8,7 @@ import { Progress } from "./ui/progress";
 import { fetchJobseeker } from "@/lib/profile";
 import { Jobseeker } from "@/lib/jobseeker";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const DEFAULT_USER_ID = process.env.NEXT_PUBLIC_DEFAULT_USER_ID || "USER_001";
+import { useAuth } from "@/context/auth-context";
 
 function computeProfileStrength(js?: Jobseeker): number {
   if (!js) return 0;
@@ -22,8 +21,11 @@ function computeProfileStrength(js?: Jobseeker): number {
 }
 
 export default function ProfileSidebar() {
+  const { user, isLoading } = useAuth();
+
+  const DEFAULT_USER_ID = user?.id || "";
   const [data, setData] = useState<Jobseeker | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isLoading);
 
   useEffect(() => {
     let on = true;

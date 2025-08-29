@@ -25,11 +25,16 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
+// 🔹 Schema validasi login
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
+
+// 🔹 Type inference
+type LoginFormValues = z.infer<typeof formSchema>;
 
 export function LoginForm({
   className,
@@ -39,7 +44,7 @@ export function LoginForm({
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -47,14 +52,21 @@ export function LoginForm({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
     try {
-      await login(values.email, values.password);
+      const result = await login(values.email, values.password);
+
+      if (!result.success) {
+        toast.error(result.message ?? "Login failed");
+        return;
+      }
+
+      toast.success("Welcome back!");
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      // Show error message to user
+      // TODO: tampilkan error message ke user
     } finally {
       setIsLoading(false);
     }
@@ -73,6 +85,7 @@ export function LoginForm({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-3">
+                {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -86,6 +99,8 @@ export function LoginForm({
                     </FormItem>
                   )}
                 />
+
+                {/* Password */}
                 <FormField
                   control={form.control}
                   name="password"
@@ -107,6 +122,8 @@ export function LoginForm({
                     </FormItem>
                   )}
                 />
+
+                {/* Buttons */}
                 <div className="flex flex-col gap-2 mt-3">
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Logging in..." : "Login"}
@@ -116,6 +133,8 @@ export function LoginForm({
                   </Button>
                 </div>
               </div>
+
+              {/* Link ke register */}
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <Link

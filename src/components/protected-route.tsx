@@ -29,7 +29,7 @@ export function ProtectedRoute({
         router.push(
           user.accountType === "employer"
             ? "/dashboard/employer"
-            : "/dashboard/user"
+            : "/dashboard/jobseeker"
         );
       }
     }
