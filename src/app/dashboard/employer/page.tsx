@@ -1,178 +1,312 @@
 "use client";
 
-import { ProtectedRoute } from "@/components/protected-route";
+import { useEffect, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/config/firebase";
 import { useAuth } from "@/context/auth-context";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
+// UI Components
+import { Spinner } from "@/components/ui/kibo-ui/spinner";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+
+// Icons
 import {
-  Building,
+  Edit3,
+  Save,
+  X,
+  Building2,
+  Factory,
+  Users,
   MapPin,
   Globe,
   Mail,
-  Phone,
-  Users,
-  Edit,
 } from "lucide-react";
 
-export default function EmployerProfilePage() {
-  const { user } = useAuth();
+type CompanyData = {
+  companyName: string;
+  industry: string;
+  employeeCount: string;
+  location: string;
+  website: string;
+  email: string;
+  about: string;
+};
 
-  // Mock company data - replace with real data later
-  const companyData = {
-    name: "Tech Solutions Inc",
-    industry: "Information Technology",
-    size: "50-200 employees",
-    founded: "2015",
-    location: "San Francisco, CA",
-    website: "https://techsolutions.com",
-    email: "contact@techsolutions.com",
-    phone: "+1 (555) 123-4567",
-    about:
-      "Leading technology solutions provider with over 10 years of experience in delivering innovative software solutions to enterprises worldwide.",
-    openPositions: [
-      {
-        id: 1,
-        title: "Senior Frontend Developer",
-        type: "Full-time",
-        location: "Remote",
-        applications: 12,
-      },
-      {
-        id: 2,
-        title: "DevOps Engineer",
-        type: "Full-time",
-        location: "Hybrid",
-        applications: 8,
-      },
-    ],
+export default function CompanyOverview() {
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [companyData, setCompanyData] = useState<CompanyData | null>(null);
+  const [editData, setEditData] = useState<CompanyData | null>(null);
+
+  // Ambil data dari Firestore
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const docRef = doc(db, "jobposters", user.id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setCompanyData({
+            companyName: data.company_name || "",
+            industry: data.industry || "Information Technology",
+            employeeCount: data.employee_count || "",
+            location: data.location || "",
+            website: data.website || "",
+            email: data.contact_email || "",
+            about: data.about_company || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching company data:", error);
+      }
+    };
+
+    fetchCompanyData();
+  }, [user]);
+
+  // Handle edit
+  const handleEdit = () => {
+    if (companyData) {
+      setEditData(companyData);
+      setIsEditing(true);
+    }
   };
 
-  return (
-    <ProtectedRoute allowedRoles={["employer"]}>
-      <div className="space-y-6">
-        {/* Company Overview */}
-        <div className="flex justify-between items-start">
-          <h1 className="text-3xl font-bold">Company Profile</h1>
-          <Button variant="outline" size="sm">
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-        </div>
+  const handleCancel = () => {
+    setEditData(companyData);
+    setIsEditing(false);
+  };
 
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="jobs">Job Listings</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-          </TabsList>
+  const handleSave = async () => {
+    if (!editData || !user?.id) return;
 
-          <TabsContent value="overview" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{companyData.name}</CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  <Building className="h-4 w-4" />
-                  {companyData.industry}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 text-sm">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      {companyData.size}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      {companyData.location}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href={companyData.website}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {companyData.website}
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      {companyData.email}
-                    </div>
-                  </div>
-                </div>
+    try {
+      const docRef = doc(db, "jobposters", user.id);
+      await updateDoc(docRef, {
+        company_name: editData.companyName,
+        industry: editData.industry,
+        employee_count: editData.employeeCount,
+        location: editData.location,
+        website: editData.website,
+        contact_email: editData.email,
+        about_company: editData.about,
+      });
 
-                <div>
-                  <h3 className="font-semibold mb-2">About Company</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {companyData.about}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+      setCompanyData(editData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating company data:", error);
+    }
+  };
 
-          <TabsContent value="jobs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Job Listings</CardTitle>
-                <CardDescription>
-                  Manage your current job postings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {companyData.openPositions.map((job) => (
-                    <div
-                      key={job.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <h3 className="font-medium">{job.title}</h3>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                          <Badge variant="outline">{job.type}</Badge>
-                          <span>•</span>
-                          <span>{job.location}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">
-                          {job.applications} applications
-                        </div>
-                        <Button variant="link" size="sm" className="mt-1">
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+  const updateEditData = (updates: Partial<CompanyData>) => {
+    setEditData((prev) => (prev ? { ...prev, ...updates } : prev));
+  };
 
-          <TabsContent value="team" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>Manage your company's team</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  Team management features coming soon...
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+  if (!companyData)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
       </div>
-    </ProtectedRoute>
+    );
+
+  return (
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Company Info Card */}
+        <Card className="shadow-sm">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
+            {/* Company Header */}
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-8 mb-6 lg:mb-8">
+              {/* Left Side - Company Basic Info */}
+              <div className="space-y-4 lg:space-y-6 w-full lg:w-1/2">
+                {/* Company Name */}
+                {isEditing ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <Building2 className="h-4 w-4 flex-shrink-0" />
+                    <Input
+                      value={editData?.companyName || ""}
+                      onChange={(e) =>
+                        updateEditData({ companyName: e.target.value })
+                      }
+                      className="text-xl sm:text-2xl font-bold border p-2 h-auto bg-transparent w-full"
+                      placeholder="Company Name"
+                    />
+                  </div>
+                ) : (
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold break-words">
+                    {companyData.companyName}
+                  </h2>
+                )}
+
+                {/* Industry */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 ">
+                  <Factory className="h-4 w-4 flex-shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={editData?.industry || ""}
+                      onChange={(e) =>
+                        updateEditData({ industry: e.target.value })
+                      }
+                      className="border p-2 h-auto bg-transparent w-full"
+                      placeholder="Industry"
+                    />
+                  ) : (
+                    <span className="text-sm sm:text-base break-words">
+                      {companyData.industry}
+                    </span>
+                  )}
+                </div>
+
+                {/* Employee Count */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <Users className="h-4 w-4 flex-shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={editData?.employeeCount || ""}
+                      onChange={(e) =>
+                        updateEditData({ employeeCount: e.target.value })
+                      }
+                      className="p-2 h-auto bg-transparent border w-full"
+                      placeholder="Number of employees"
+                    />
+                  ) : (
+                    <span className="text-sm sm:text-base">
+                      {companyData.employeeCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Side - Contact Info */}
+              <div className="space-y-4 lg:space-y-6 w-full lg:w-1/2">
+                {/* Location */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={editData?.location || ""}
+                      onChange={(e) =>
+                        updateEditData({ location: e.target.value })
+                      }
+                      className="p-2 h-auto bg-transparent border w-full"
+                      placeholder="Location"
+                    />
+                  ) : (
+                    <span className="text-sm sm:text-base break-words">
+                      {companyData.location}
+                    </span>
+                  )}
+                </div>
+
+                {/* Website */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <Globe className="h-4 w-4 flex-shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={editData?.website || ""}
+                      onChange={(e) =>
+                        updateEditData({ website: e.target.value })
+                      }
+                      className="border p-2 h-auto bg-transparent text-blue-600 w-full"
+                      placeholder="Website URL"
+                    />
+                  ) : (
+                    <a
+                      href={companyData.website}
+                      className="text-blue-600 hover:text-blue-800 transition-colors text-sm sm:text-base break-all"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {companyData.website}
+                    </a>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  {isEditing ? (
+                    <Input
+                      value={editData?.email || ""}
+                      onChange={(e) =>
+                        updateEditData({ email: e.target.value })
+                      }
+                      className="border p-2 h-auto bg-transparent w-full"
+                      placeholder="Contact email"
+                      type="email"
+                    />
+                  ) : (
+                    <span className="text-sm sm:text-base break-all">
+                      {companyData.email}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* About Company */}
+            <div className="space-y-4 lg:space-y-6">
+              <h3 className="text-lg sm:text-xl font-semibold">
+                About Company
+              </h3>
+              {isEditing ? (
+                <Textarea
+                  value={editData?.about || ""}
+                  onChange={(e) => updateEditData({ about: e.target.value })}
+                  className="leading-relaxed min-h-[100px] sm:min-h-[120px] border-gray-200 w-full resize-vertical"
+                  placeholder="Tell us about your company..."
+                />
+              ) : (
+                <p className="leading-relaxed text-sm sm:text-base text-gray-700">
+                  {companyData.about}
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-end mt-6 lg:mt-8 gap-2 sm:gap-3">
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={handleSave}
+                    size="sm"
+                    className="gap-2 w-full sm:w-auto order-2 sm:order-1"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Changes
+                  </Button>
+                  <Button
+                    onClick={handleCancel}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 bg-transparent w-full sm:w-auto order-1 sm:order-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={handleEdit}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-transparent w-full sm:w-auto"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

@@ -18,10 +18,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { doc, getDoc } from "@firebase/firestore";
 import { db } from "@/config/firebase";
-import { Job } from "@/lib/jobs";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
+import { Job } from "../../../../../../types/jobs";
 
 export default async function JobDetailsPage({
   params,
@@ -31,12 +31,9 @@ export default async function JobDetailsPage({
   type JobPoster = {
     id: string;
     company_name: string;
-    // tambahkan field lain kalau perlu
   };
 
   const { id } = await params;
-  console.log(id); // Ganti dengan fetch data pekerjaan berdasarkan ID
-  // Misalnya, panggil API atau query database di sini
 
   async function getJobById(jobId: string): Promise<Job | null> {
     try {
@@ -54,7 +51,6 @@ export default async function JobDetailsPage({
         if (posterSnap.exists()) {
           const posterData = posterSnap.data() as JobPoster;
           posterName = posterData.company_name;
-          console.log(posterData);
         }
       }
 
@@ -71,18 +67,33 @@ export default async function JobDetailsPage({
 
   const job: Job | null = await getJobById(id);
 
-  // Format Post Date
-  const postedAgo = job?.created_at
-    ? formatDistanceToNow(job.created_at, { addSuffix: true })
-    : "";
+  if (!job) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Job Not Found</h1>
+          <p className="text-muted-foreground mt-2">
+            The job you're looking for doesn't exist.
+          </p>
+          <Link href="/dashboard/jobseeker/search-job">
+            <Button className="mt-4">Back to Jobs</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  console.log(job);
+  // Format dates
+  const postedAgo = formatDistanceToNow(new Date(job.created_at), {
+    addSuffix: true,
+  });
+  const postedDate = format(new Date(job.created_at), "MMM d, yyyy");
 
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div>
-          {/* Button */}
+          {/* Back Button */}
           <div className="flex items-center gap-4 mb-6">
             <Button variant="ghost" size="sm" className="p-2">
               <Link
@@ -105,58 +116,50 @@ export default async function JobDetailsPage({
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
                         <AvatarFallback className="bg-blue-600 text-white text-xl font-bold">
-                          A
+                          {job.company.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h1 className="text-2xl font-bold">
-                          {job?.title || "Job Title"}
-                        </h1>
+                        <h1 className="text-2xl font-bold">{job.title}</h1>
                         <div className="flex items-center gap-2">
                           <span className="text-lg text-blue-600">
-                            {job?.poster_name || "Company Name"}
+                            {job.company}
                           </span>
-
                           <MdVerified className="inline text-green-600" />
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Bookmark className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      <div className="mb-4">
+                        <Badge variant="default">{job.work_mode}</Badge>
+                      </div>
                     </div>
                   </div>
 
                   {/* Job Meta */}
-                  <div className="flex items-center gap-8 mb-4">
+                  <div className="flex items-center gap-8 mb-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
-                      <span className="text-sm">{job?.location}</span>
+                      <span className="text-sm">{job.location}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Briefcase className="h-4 w-4" />
-                      <span className="text-sm">Contract</span>
+                      <span className="text-sm">{job.type}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      <span className="text-sm">4+ years</span>
+                      <span className="text-sm">{job.experience}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
                       <span className="text-sm">
-                        {job?.salary_min
-                          ? `${job.salary_min.toLocaleString()}`
-                          : ""}{" "}
-                        {job?.salary_max
-                          ? `– ${job.salary_max.toLocaleString()}`
-                          : ""}
+                        ${parseInt(job.salary_min).toLocaleString()} - $
+                        {parseInt(job.salary_max).toLocaleString()}
                       </span>
                     </div>
                   </div>
+
+                  {/* Work Mode Badge */}
 
                   {/* Bottom Row */}
                   <div className="flex items-center justify-between text-sm">
@@ -167,7 +170,7 @@ export default async function JobDetailsPage({
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
-                        <span>15 applicants</span>
+                        <span>{job.applicants} applicants</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -184,8 +187,8 @@ export default async function JobDetailsPage({
                   <CardTitle>Job Description</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="leading-relaxed">
-                    {job?.description || "description"}
+                  <p className="leading-relaxed whitespace-pre-line">
+                    {job.description}
                   </p>
                 </CardContent>
               </Card>
@@ -197,13 +200,7 @@ export default async function JobDetailsPage({
                 </CardHeader>
                 <CardContent className="mt-3">
                   <div className="space-y-3">
-                    {[
-                      "Bachelor's degree in Supply Chain Management or related field",
-                      "4+ years experience in inventory management",
-                      "Experience with WMS and ERP systems",
-                      "Strong analytical and leadership skills",
-                      "Knowledge of cold chain management",
-                    ].map((requirement, index) => (
+                    {job.requirements.map((requirement, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
                           <Check className="h-3 w-3 text-green-700" />
@@ -222,13 +219,7 @@ export default async function JobDetailsPage({
                 </CardHeader>
                 <CardContent className="mt-3">
                   <div className="space-y-3">
-                    {[
-                      "Competitive salary package",
-                      "Health insurance coverage",
-                      "Professional development opportunities",
-                      "Collaborative work environment",
-                      "Career advancement prospects",
-                    ].map((benefit, index) => (
+                    {job.offers.map((benefit, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
                           <Star className="h-3 w-3 text-orange-400" />
@@ -246,7 +237,7 @@ export default async function JobDetailsPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Apply for this job</CardTitle>
-                  <p className="text-sm">Recruiter active 1 minute ago</p>
+                  <p className="text-sm">Posted {postedDate}</p>
                 </CardHeader>
                 <CardContent className="space-y-3 mt-3">
                   <Button className="w-full">
@@ -262,26 +253,23 @@ export default async function JobDetailsPage({
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">
-                    About {job?.poster_name}
-                  </CardTitle>
+                  <CardTitle className="text-lg">About {job.company}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-start gap-3 mb-4">
                     <Avatar className="h-12 w-12">
                       <AvatarFallback className="bg-blue-600 text-white font-bold">
-                        A
+                        {job.company.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold">{job?.poster_name}</h3>
+                      <h3 className="font-semibold">{job.company}</h3>
                       <p className="text-sm">Technology Company</p>
                     </div>
                   </div>
                   <p className="text-sm mb-4">
-                    ASTRO is a leading technology company specializing in
-                    innovative solutions for supply chain and inventory
-                    management.
+                    {job.company} is committed to providing innovative solutions
+                    and creating a positive work environment for all employees.
                   </p>
                   <Button variant="outline" className="w-full bg-transparent">
                     View Company Profile
@@ -291,44 +279,46 @@ export default async function JobDetailsPage({
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Similar Jobs</CardTitle>
+                  <CardTitle className="text-lg">Job Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-sm">
-                          Inventory Manager
-                        </h4>
-                        <p className="text-xs">TechCorp • Jakarta</p>
-                        <p className="text-xs">2d ago</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-orange-400 text-orange-400" />
-                        <span className="text-xs font-medium">88%</span>
-                      </div>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-sm">
-                          Supply Chain Specialist
-                        </h4>
-                        <p className="text-xs">LogiTech • Bandung</p>
-                        <p className="text-xs">3d ago</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-orange-400 text-orange-400" />
-                        <span className="text-xs font-medium">85%</span>
-                      </div>
-                    </div>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Job Type:
+                    </span>
+                    <span className="text-sm font-medium">{job.type}</span>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="w-full mt-4 bg-transparent"
-                  >
-                    View More Jobs
-                  </Button>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Work Mode:
+                    </span>
+                    <span className="text-sm font-medium">{job.work_mode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Experience:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {job.experience}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Salary:
+                    </span>
+                    <span className="text-sm font-medium">
+                      ${parseInt(job.salary_min).toLocaleString()} - $
+                      {parseInt(job.salary_max).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Applicants:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {job.applicants}
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
             </div>
