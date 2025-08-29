@@ -10,6 +10,7 @@ export type Job = {
   salary_max?: number;
   created_at?: number;
   poster_id?: string;
+  poster_name?: string;
   edition_prices?: Record<string, number>;
   status?: string;
 };
