@@ -1,0 +1,448 @@
+.fwc-chat-widget {
+  font-family: "Inter", sans-serif;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Header bar */
+.fwc-chat-widget .fwc-chat-header {
+  background-color: #577add;
+  color: white;
+  font-weight: bold;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.fwc-chat-widget .fwc-chat-header img {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+/* Message area */
+.fwc-chat-widget .fwc-chat-body {
+  padding: 16px;
+  height: 400px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+
+/* Message row wrapper: aligns left or right */
+.fwc-chat-widget .fwc-chat-message-row {
+  display: flex;
+  margin-bottom: 8px;
+  flex-direction: column;
+}
+
+.fwc-chat-widget .fwc-chat-message-row.left {
+  justify-content: flex-start;
+}
+
+.fwc-chat-widget .fwc-chat-message-row.right {
+  justify-content: flex-end;
+}
+
+/* Message bubbles — override default bubble if needed */
+.fwc-chat-widget .fwc-chat-message.user {
+  background-color: #dbeafe; /* blue-100 */
+  color: #000 !important;
+  align-self: flex-end;
+  border-radius: 16px;
+  padding: 8px 12px;
+  max-width: 70%;
+}
+
+.fwc-chat-widget .fwc-chat-message.response {
+  background-color: #e8fce8; /* light green */
+  color: green;
+  align-self: flex-start;
+  border-radius: 16px;
+  padding: 8px 12px;
+  max-width: 70%;
+}
+
+/* Action response blocks */
+.fwc-chat-widget .fwc-chat-message.action {
+  background-color: #ede9fe; /* violet-100 */
+  color: #4f46e5; /* violet-600 */
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+  max-width: 70%;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Loading message (animated dots) */
+.fwc-chat-widget .fwc-chat-message.loading {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #666;
+  font-style: italic;
+  font-family: monospace;
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+  width: fit-content;
+}
+
+/* increased font-size */
+.fwc-chat-message {
+  font-size: 15px;
+}
+
+/* Expand/collapse action button */
+.fwc-chat-widget .fwc-action-expand {
+  margin-top: 4px;
+  text-align: center;
+  max-width: 70%;
+}
+
+.fwc-chat-widget .fwc-action-expand button {
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: #4f46e5;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.fwc-chat-widget .fwc-chat-timestamp {
+  font-size: 10px;
+  color: #999;
+  margin-top: 4px;
+}
+.fwc-chat-widget .fwc-chat-timestamp.left {
+  text-align: left;
+}
+
+.fwc-chat-widget .fwc-chat-timestamp.right {
+  text-align: right;
+}
+
+/* Input section */
+.fwc-chat-widget .fwc-chat-input {
+  display: flex;
+  border-top: 1px solid #eee;
+  padding: 12px 16px;
+  background: #fff;
+}
+
+.fwc-chat-widget .fwc-chat-input input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 10px 16px;
+  outline: none;
+}
+
+.fwc-chat-widget .fwc-chat-input button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  background: #577add;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Flashing dots loader */
+.fwc-chat-widget .dot-flash::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  text-align: left;
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  33% {
+    content: ".";
+  }
+  66% {
+    content: "..";
+  }
+  100% {
+    content: "...";
+  }
+}
+
+/* helpful suggestions */
+.fwc-chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  justify-content: center;
+  background-color: #fafafa;
+  border-top: 1px solid #eee;
+  max-height: 72px;
+  overflow-y: auto;
+  border: none;
+}
+
+.fwc-chat-suggestion-button {
+  flex: 1 1 calc(50% - 12px);
+  max-width: calc(50% - 12px);
+  background-color: #eef0ff;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* animation */
+  animation: fadeInUp 0.4s ease forwards, idleFloat 3s ease-in-out infinite;
+  animation-delay: 0.1s, 0.5s; /* fadeInUp starts immediately, idleFloat starts after */
+}
+
+.fwc-chat-suggestion-button:hover {
+  background-color: #d6dbff;
+}
+
+/* input button disabled */
+.fwc-chat-input button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* chat header button */
+.fwc-chat-header-button {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+  color: white;
+}
+
+/* chat suggestion button */
+/* this is for the animation effect in react app */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* smooth bobbing effect */
+@keyframes idleFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.fwc-chat-suggestion-button {
+  flex: 1 1 calc(50% - 12px);
+  max-width: calc(50% - 12px);
+  background-color: #eef0ff;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Separate animations for entry and idle */
+  animation-name: fadeInUp, idleFloat;
+  animation-duration: 0.4s, 3s;
+  animation-timing-function: ease, ease-in-out;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1, infinite;
+  opacity: 0; /* Initial hidden */
+}
+
+.fwc-chat-suggestion-button:nth-child(1) {
+  animation-delay: 0.1s, 1s;
+}
+.fwc-chat-suggestion-button:nth-child(2) {
+  animation-delay: 0.15s, 1.15s;
+}
+.fwc-chat-suggestion-button:nth-child(3) {
+  animation-delay: 0.2s, 1.3s;
+}
+.fwc-chat-suggestion-button:nth-child(4) {
+  animation-delay: 0.25s, 1.45s;
+}
+
+/* pulse glow */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(87, 122, 221, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(87, 122, 221, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(87, 122, 221, 0);
+  }
+}
+
+.fwc-chat-suggestion-button.pulse {
+  animation: pulseGlow 2.5s ease-out infinite;
+}
+
+/* smooth open and collapse animation */
+.fwc-chat-window {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 380px;
+  max-height: 700px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+
+  opacity: 1;
+  transform: scaleY(1);
+  transform-origin: bottom right;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fwc-chat-window.collapsed {
+  opacity: 0;
+  transform: scaleY(0);
+  pointer-events: none;
+}
+
+.fwc-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #fff;
+}
+
+.fwc-chat-input-textarea {
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+/* spinning animation when loading chat for first time */
+.spinner {
+  border: 4px solid #eee;
+  border-top: 4px solid #3366ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* to handle the styling of the chatbot */
+.fwc-chat-widget .fwc-chat-body {
+  padding: 16px;
+  height: 400px;
+  overflow-y: auto;
+  background: #fff;
+
+  padding-bottom: 100px;
+}
+
+.fwc-chat-widget .fwc-chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  justify-content: center;
+
+  background: transparent;
+  border-top: 0;
+  max-height: none;
+  overflow: visible;
+
+  position: sticky;
+  bottom: 60px;
+  z-index: 1;
+}
+
+.fwc-chat-widget .fwc-chat-suggestion-button {
+  flex: 1 1 calc(50% - 12px);
+  max-width: calc(50% - 12px);
+  background-color: #eef0ff;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  animation-name: fadeInUp, idleFloat;
+  animation-duration: 0.4s, 3s;
+  animation-timing-function: ease, ease-in-out;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1, infinite;
+  opacity: 0;
+}
+
+/* make the text black when your typing to the chatbot */
+/* 1) Make the default text inside the widget dark */
+.fwc-chat-widget { 
+  color: #111;              /* base text color */
+}
+
+/* keep header white */
+.fwc-chat-widget .fwc-chat-header {
+  color: #fff;
+}
+
+/* 2) Inputs: textarea + (any) input fields */
+.fwc-chat-widget .fwc-chat-input-textarea,
+.fwc-chat-widget .fwc-chat-input input {
+  color: #111 !important;   /* make typed text black */
+  caret-color: #111;        /* black caret */
+  background-color: #fff;   /* ensure white background */
+}
+
+/* 3) Placeholder color */
+.fwc-chat-widget .fwc-chat-input-textarea::placeholder,
+.fwc-chat-widget .fwc-chat-input input::placeholder {
+  color: #9aa1ad;           /* subtle gray */
+  opacity: 1;
+}
