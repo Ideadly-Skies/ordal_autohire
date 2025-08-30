@@ -25,7 +25,7 @@ export type User = {
   id: string;
   personal_info: { name: string; email: string };
   accountType: AccountType;
-  experience?: number;
+  background_info?: { yoe?: number };
 };
 
 type AuthContextType = {
