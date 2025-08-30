@@ -38,6 +38,7 @@ import { FormSection } from "./form-section";
 import { FormField } from "./form-field";
 import { DynamicInputList } from "./dynamic-input-list";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 interface JobFormProps {
   initialData?: Job;
@@ -47,6 +48,7 @@ interface JobFormProps {
 export function JobForm({ initialData, isEditing = false }: JobFormProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<Job>({
     id: initialData?.id, // Add this line to preserve the job ID
@@ -66,8 +68,76 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
     status: initialData?.status || "open", // Default to "open"
   });
 
+  const validateForm = () => {
+    const requiredFields = {
+      title: "Job Title",
+      company: "Company Name",
+      location: "Location",
+      experience: "Years of Experience",
+      salary_min: "Minimum Salary",
+      salary_max: "Maximum Salary",
+      description: "Job Description",
+    };
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (
+        !formData[field as keyof Job] ||
+        formData[field as keyof Job] === ""
+      ) {
+        toast.error(`${label} is required`);
+        return false;
+      }
+    }
+
+    // Validate salary range
+    const minSalary = parseInt(formData.salary_min);
+    const maxSalary = parseInt(formData.salary_max);
+
+    if (isNaN(minSalary) || isNaN(maxSalary)) {
+      toast.error("Salary values must be valid numbers");
+      return false;
+    }
+
+    if (minSalary >= maxSalary) {
+      toast.error("Maximum salary must be greater than minimum salary");
+      return false;
+    }
+
+    // Validate requirements and offers
+    const validRequirements = formData.requirements.filter(
+      (req) => req.trim() !== ""
+    );
+    const validOffers = formData.offers.filter((offer) => offer.trim() !== "");
+
+    if (validRequirements.length === 0) {
+      toast.error("At least one requirement is needed");
+      return false;
+    }
+
+    if (validOffers.length === 0) {
+      toast.error("At least one benefit/offer is needed");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error("You must be logged in to post a job");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const loadingToast = toast.loading(
+      isEditing ? "Updating job..." : "Creating job..."
+    );
 
     const cleanedData = {
       title: formData.title || "",
@@ -92,15 +162,35 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
         const jobRef = doc(db, "jobs", formData.id);
         // Remove the id from the data being updated (Firebase doesn't allow updating the document ID)
         await updateDoc(jobRef, cleanedData);
+
+        toast.success(`Job "${formData.title}" updated successfully!`, {
+          id: loadingToast,
+        });
         console.log("Job updated successfully with ID:", formData.id);
       } else {
         const docRef = await addDoc(collection(db, "jobs"), cleanedData);
+
+        toast.success(`Job "${formData.title}" posted successfully!`, {
+          id: loadingToast,
+        });
         console.log("New job created with ID:", docRef.id);
       }
-      router.push("/dashboard/employer/jobs"); // Updated path
+
+      // Redirect after a short delay to show the success message
+      setTimeout(() => {
+        router.push("/dashboard/employer/jobs");
+      }, 1500);
     } catch (error) {
       console.error("Error saving job:", error);
-      alert("Error saving job. Please try again.");
+
+      toast.error(
+        isEditing
+          ? "Failed to update job. Please try again."
+          : "Failed to create job. Please try again.",
+        { id: loadingToast }
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,13 +206,20 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
       ...prev,
       requirements: [...prev.requirements, ""],
     }));
+    toast.success("New requirement field added");
   };
 
   const removeRequirement = (index: number) => {
+    if (formData.requirements.length <= 1) {
+      toast.error("At least one requirement is needed");
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       requirements: prev.requirements.filter((_, i) => i !== index),
     }));
+    toast.success("Requirement removed");
   };
 
   const updateRequirement = (index: number, value: string) => {
@@ -139,13 +236,20 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
       ...prev,
       offers: [...prev.offers, ""],
     }));
+    toast.success("New benefit field added");
   };
 
   const removeOffer = (index: number) => {
+    if (formData.offers.length <= 1) {
+      toast.error("At least one benefit/offer is needed");
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       offers: prev.offers.filter((_, i) => i !== index),
     }));
+    toast.success("Benefit removed");
   };
 
   const updateOffer = (index: number, value: string) => {
@@ -175,6 +279,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("title", e.target.value)}
                 placeholder="e.g. Senior Frontend Developer"
                 required
+                disabled={isSubmitting}
               />
             </FormField>
             <FormField label="Company Name" required>
@@ -183,6 +288,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("company", e.target.value)}
                 placeholder="e.g. TechCorp Inc."
                 required
+                disabled={isSubmitting}
               />
             </FormField>
           </div>
@@ -194,12 +300,14 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("location", e.target.value)}
                 placeholder="e.g. San Francisco, CA"
                 required
+                disabled={isSubmitting}
               />
             </FormField>
             <FormField label="Work Mode">
               <Select
                 value={formData.work_mode}
                 onValueChange={(value) => handleChange("work_mode", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select work mode" />
@@ -218,6 +326,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
               <Select
                 value={formData.type}
                 onValueChange={(value) => handleChange("type", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select employment type" />
@@ -237,6 +346,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("experience", e.target.value)}
                 placeholder="e.g. 3+ years"
                 required
+                disabled={isSubmitting}
               />
             </FormField>
           </div>
@@ -248,6 +358,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("salary_min", e.target.value)}
                 placeholder="e.g. 80,000"
                 required
+                disabled={isSubmitting}
               />
             </FormField>
             <FormField label="Maximum Salary" required>
@@ -256,6 +367,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onChange={(e) => handleChange("salary_max", e.target.value)}
                 placeholder="e.g. 120,000"
                 required
+                disabled={isSubmitting}
               />
             </FormField>
             <FormField label="Job Status" required>
@@ -264,6 +376,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 onValueChange={(value: "open" | "closed") =>
                   handleChange("status", value)
                 }
+                disabled={isSubmitting}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select job status" />
@@ -293,6 +406,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
               placeholder="Describe the role, responsibilities, and key details..."
               rows={4}
               required
+              disabled={isSubmitting}
             />
           </FormField>
         </FormSection>
@@ -361,12 +475,18 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
         )}
 
         <div className="flex gap-4 pt-4">
-          <Button type="submit" className="gap-2">
+          <Button type="submit" className="gap-2" disabled={isSubmitting}>
             <Save className="h-4 w-4" />
-            {isEditing ? "Update Job" : "Post Job"}
+            {isSubmitting
+              ? isEditing
+                ? "Updating..."
+                : "Posting..."
+              : isEditing
+              ? "Update Job"
+              : "Post Job"}
           </Button>
           <Link href="/dashboard/employer/jobs">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isSubmitting}>
               Cancel
             </Button>
           </Link>

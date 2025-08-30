@@ -16,12 +16,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { doc, getDoc } from "@firebase/firestore";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  increment,
+} from "@firebase/firestore";
 import { db } from "@/config/firebase";
 import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
 import { Job } from "../../../../../../types/jobs";
+import ApplyButton from "./apply-button";
 
 export default async function JobDetailsPage({
   params,
@@ -159,8 +170,6 @@ export default async function JobDetailsPage({
                     </div>
                   </div>
 
-                  {/* Work Mode Badge */}
-
                   {/* Bottom Row */}
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
@@ -240,14 +249,7 @@ export default async function JobDetailsPage({
                   <p className="text-sm">Posted {postedDate}</p>
                 </CardHeader>
                 <CardContent className="space-y-3 mt-3">
-                  <Button className="w-full">
-                    <Link
-                      href={"/dashboard/jobseeker/applications"}
-                      className="w-full"
-                    >
-                      Apply Now
-                    </Link>
-                  </Button>
+                  <ApplyButton job={job} />
                 </CardContent>
               </Card>
 

@@ -16,8 +16,16 @@ import {
   Building,
   Eye,
   MonitorCog,
+  Trash2,
 } from "lucide-react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/config/firebase";
 import { format } from "date-fns";
@@ -30,6 +38,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function JobsPage() {
   const { user } = useAuth();
@@ -63,9 +82,21 @@ export default function JobsPage() {
     fetchJobs();
   }, [user?.id]);
 
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await deleteDoc(doc(db, "jobs", jobId));
+      // Refresh the jobs list
+      setJobs(jobs.filter((job) => job.id !== jobId));
+      console.log("Job deleted successfully");
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      alert("Error deleting job. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 ">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -99,7 +130,7 @@ export default function JobsPage() {
                             View
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogContent className=" w-full max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle className="text-2xl flex items-center gap-2">
                               {job.title}{" "}
@@ -201,7 +232,44 @@ export default function JobsPage() {
                               </div>
                             </div>
 
-                            <div className="flex justify-end border-t pt-4">
+                            <div className="flex justify-between border-t pt-4">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="gap-2"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete Job
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Delete Job Posting
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete "
+                                      {job.title}"? This action cannot be undone
+                                      and will remove all associated data
+                                      including applications.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteJob(job.id!)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Delete Permanently
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+
                               <Link
                                 href={`/dashboard/employer/jobs/edit/${job.id}`}
                               >
