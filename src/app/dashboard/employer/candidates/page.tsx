@@ -285,7 +285,7 @@ export default function CandidatesListPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className=" mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Candidates</h1>

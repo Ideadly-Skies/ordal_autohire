@@ -108,7 +108,7 @@ export default function ApplyButton({ job }: ApplyButtonProps) {
         phone: jobseekerData.personal_info?.phone || "",
         id: jobseekerData.id || user.id,
         // Background info
-        yoe: user.experience || 0, // Years of experience
+        yoe: user.background_info?.yoe || 0, // Years of experience
         resume_summary: jobseekerData.resume_summary || "",
         background_info: {
           summary: jobseekerData.background_info?.summary || "",
