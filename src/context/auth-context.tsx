@@ -35,7 +35,8 @@ type AuthContextType = {
     name: string,
     email: string,
     password: string,
-    accountType: AccountType
+    accountType: AccountType,
+    companyData?: any // Add this parameter
   ) => Promise<AuthResults>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -94,20 +95,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     email: string,
     password: string,
-    accountType: AccountType
+    accountType: AccountType,
+    companyData?: any // Add this parameter for employer data
   ): Promise<AuthResults> => {
     setIsLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      const newUser: User = {
+      let newUser: any = {
         id: uid,
         personal_info: { name, email },
         accountType,
       };
 
-      // Pilih collection berdasarkan accountType
+      // If employer, add company data
+      if (accountType === "employer" && companyData) {
+        newUser = {
+          ...newUser,
+          about_company: companyData.aboutCompany,
+          accountType: "employer",
+          company_name: companyData.companyName,
+          contact_email: companyData.contactEmail,
+          employee_count: companyData.employeeCount,
+          industry: companyData.industry,
+          location: companyData.location,
+          personal_info: {
+            email: email,
+            name: name,
+          },
+          plan: "free", // Default plan
+          website: companyData.website || "",
+        };
+      }
+
+      // Choose collection based on accountType
       const collectionName =
         accountType === "jobseeker" ? "jobseekers" : "jobposters";
 
