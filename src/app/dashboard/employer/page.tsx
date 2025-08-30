@@ -118,10 +118,54 @@ export default function CompanyOverview() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className=" px-4 py-4 sm:py-6 lg:py-8">
         {/* Company Info Card */}
+        <div className="mb-8 flex justify-between items-start">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold text-foreground">
+              Profile Information
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your company profile details to keep them up to date.
+            </p>
+          </div>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end mt-6 lg:mt-8 gap-2 sm:gap-3">
+            {isEditing ? (
+              <>
+                <Button
+                  onClick={handleSave}
+                  size="sm"
+                  className="gap-2 w-full sm:w-auto order-2 sm:order-1"
+                >
+                  <Save className="h-4 w-4" />
+                  Save Changes
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 bg-transparent w-full sm:w-auto order-1 sm:order-2"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={handleEdit}
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-transparent w-full sm:w-auto"
+              >
+                <Edit3 className="h-4 w-4" />
+                Edit Profile
+              </Button>
+            )}
+          </div>
+        </div>
         <Card className="shadow-sm">
-          <CardContent className="p-4 sm:p-6 lg:p-8">
+          <CardContent className="">
             {/* Company Header */}
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-8 mb-6 lg:mb-8">
               {/* Left Side - Company Basic Info */}
@@ -264,44 +308,9 @@ export default function CompanyOverview() {
                   placeholder="Tell us about your company..."
                 />
               ) : (
-                <p className="leading-relaxed text-sm sm:text-base text-gray-700">
+                <p className="leading-relaxed text-sm sm:text-base ">
                   {companyData.about}
                 </p>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end mt-6 lg:mt-8 gap-2 sm:gap-3">
-              {isEditing ? (
-                <>
-                  <Button
-                    onClick={handleSave}
-                    size="sm"
-                    className="gap-2 w-full sm:w-auto order-2 sm:order-1"
-                  >
-                    <Save className="h-4 w-4" />
-                    Save Changes
-                  </Button>
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 bg-transparent w-full sm:w-auto order-1 sm:order-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={handleEdit}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 bg-transparent w-full sm:w-auto"
-                >
-                  <Edit3 className="h-4 w-4" />
-                  Edit Profile
-                </Button>
               )}
             </div>
           </CardContent>
