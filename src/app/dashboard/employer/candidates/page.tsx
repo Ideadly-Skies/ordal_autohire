@@ -185,9 +185,11 @@ export default function CandidatesListPage() {
 
   const uniquePositions = [...new Set(candidates.map((c) => c.position))];
 
-  const handleStatusChange = async (candidateId: string, newStatus: string) => {
+  const handleStatusChange = async (
+    candidate: Candidate,
+    newStatus: string
+  ) => {
     try {
-      const candidate = candidates.find((c) => c.id === candidateId);
       if (!candidate) return;
 
       // Update in Firestore - jobs/{jobId}/applicants/{candidateId}
@@ -196,15 +198,14 @@ export default function CandidatesListPage() {
         "jobs",
         candidate.job_id,
         "applicants",
-        candidateId
+        candidate.id
       );
       await updateDoc(candidateRef, {
         status: newStatus,
         updated_at: Date.now(),
       });
 
-      // Also update in jobseekers/{userId}/jobs_applied collection
-      // Find the application by job_id and update its status
+      // Update in jobseekers collection
       const jobsAppliedRef = collection(
         db,
         "jobseekers",
@@ -217,7 +218,6 @@ export default function CandidatesListPage() {
       );
       const jobsAppliedSnapshot = await getDocs(jobsAppliedQuery);
 
-      // Update the matching application in jobseeker's collection
       if (!jobsAppliedSnapshot.empty) {
         jobsAppliedSnapshot.forEach(async (applicationDoc) => {
           const applicationRef = doc(
@@ -234,24 +234,28 @@ export default function CandidatesListPage() {
         });
       }
 
-      // Update local state
+      // Fix: Update local state with correct comparison
       setCandidates((prev) =>
-        prev.map((candidate) =>
-          candidate.id === candidateId
-            ? { ...candidate, status: newStatus }
-            : candidate
-        )
+        prev.map((c) => {
+          // Fix: Compare with candidate.id instead of candidate.id === candidate.id
+          if (c.id === candidate.id && c.job_id === candidate.job_id) {
+            return { ...c, status: newStatus };
+          }
+          return c;
+        })
       );
 
-      // Update selected candidate if it's currently open in modal
-      if (selectedCandidate && selectedCandidate.id === candidateId) {
-        setSelectedCandidate((prev) =>
-          prev ? { ...prev, status: newStatus } : null
-        );
+      // Fix: Update selected candidate with correct comparison
+      if (
+        selectedCandidate &&
+        selectedCandidate.id === candidate.id && // Fix: Compare with candidate.id
+        selectedCandidate.job_id === candidate.job_id
+      ) {
+        setSelectedCandidate({ ...selectedCandidate, status: newStatus });
       }
 
       console.log(
-        `Updated candidate ${candidateId} status to ${newStatus} in both collections`
+        `Updated candidate ${candidate.id} status to ${newStatus} in both collections`
       );
     } catch (error) {
       console.error("Error updating status:", error);
@@ -267,8 +271,10 @@ export default function CandidatesListPage() {
     console.log(`Downloading CV for ${candidateName}`);
   };
 
-  const handleViewDetails = (candidateId: string) => {
-    const candidate = candidates.find((c) => c.id === candidateId);
+  const handleViewDetails = (candidateId: string, jobId: string) => {
+    const candidate = candidates.find(
+      (c) => c.id === candidateId && c.job_id === jobId
+    );
     if (candidate) {
       setSelectedCandidate(candidate);
       setIsModalOpen(true);
@@ -342,7 +348,7 @@ export default function CandidatesListPage() {
         <div className="space-y-4">
           {filteredCandidates.map((candidate) => (
             <Card
-              key={candidate.id}
+              key={candidate.id + "" + candidate.job_id}
               className="bg-white border border-border hover:shadow-md transition-shadow"
             >
               <CardContent className="p-6">
@@ -366,8 +372,7 @@ export default function CandidatesListPage() {
                         {candidate.name}
                       </h3>
                       <p className="text-muted-foreground mb-3">
-                        Applied for {candidate.position} •{" "}
-                        {candidate.experience} experience
+                        Applied for {candidate.position}
                       </p>
 
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
@@ -405,7 +410,9 @@ export default function CandidatesListPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleViewDetails(candidate.id)}
+                      onClick={() =>
+                        handleViewDetails(candidate.id, candidate.job_id)
+                      }
                       className="text-muted-foreground border-border hover:bg-muted"
                     >
                       <Eye className="w-4 h-4 mr-1" />
@@ -438,35 +445,33 @@ export default function CandidatesListPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            handleStatusChange(candidate.id, "applied")
+                            handleStatusChange(candidate, "applied")
                           }
                         >
                           Mark as Applied
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            handleStatusChange(candidate.id, "in review")
+                            handleStatusChange(candidate, "in review")
                           }
                         >
                           Move to Review
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            handleStatusChange(candidate.id, "interview")
+                            handleStatusChange(candidate, "interview")
                           }
                         >
                           Schedule Interview
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(candidate.id, "hired")
-                          }
+                          onClick={() => handleStatusChange(candidate, "hired")}
                         >
                           Mark as Hired
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            handleStatusChange(candidate.id, "rejected")
+                            handleStatusChange(candidate, "rejected")
                           }
                           className="text-red-600 focus:text-red-600"
                         >
@@ -610,7 +615,7 @@ export default function CandidatesListPage() {
               )}
 
               {/* Other Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-foreground mb-2 flex items-center">
                     <Star className="w-4 h-4 mr-2" />
@@ -628,16 +633,16 @@ export default function CandidatesListPage() {
                     {selectedCandidate.salary}
                   </p>
                 </div>
-              </div>
+              </div> */}
 
-              <div>
+              {/* <div>
                 <h4 className="font-semibold text-foreground mb-2">
                   Availability
                 </h4>
                 <p className="text-muted-foreground text-sm">
                   {selectedCandidate.availability}
                 </p>
-              </div>
+              </div> */}
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t">
@@ -663,35 +668,35 @@ export default function CandidatesListPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       onClick={() =>
-                        handleStatusChange(selectedCandidate.id, "applied")
+                        handleStatusChange(selectedCandidate, "applied")
                       }
                     >
                       Mark as Applied
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
-                        handleStatusChange(selectedCandidate.id, "in review")
+                        handleStatusChange(selectedCandidate, "in review")
                       }
                     >
                       Move to Review
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
-                        handleStatusChange(selectedCandidate.id, "interview")
+                        handleStatusChange(selectedCandidate, "interview")
                       }
                     >
                       Schedule Interview
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
-                        handleStatusChange(selectedCandidate.id, "hired")
+                        handleStatusChange(selectedCandidate, "hired")
                       }
                     >
                       Mark as Hired
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
-                        handleStatusChange(selectedCandidate.id, "rejected")
+                        handleStatusChange(selectedCandidate, "rejected")
                       }
                       className="text-red-600 focus:text-red-600"
                     >
