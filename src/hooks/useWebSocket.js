@@ -67,9 +67,42 @@ export default function useWebSocket({ userId, path = "/ws/chat", chatBaseUrl = 
     return () => { alive = false; };
   }, [userId]);
 
-  const API_BASE_URL = chatBaseUrl 
-  const WS_BASE_URL = API_BASE_URL.replace(/^http/, "ws");
-  const WS_URL = `${WS_BASE_URL}${path}?user_id=${userId}`;
+  // const API_BASE_URL = chatBaseUrl 
+  // const WS_BASE_URL = API_BASE_URL.replace(/^http/, "ws");
+  // const WS_URL = `${WS_BASE_URL}${path}?user_id=${userId}`;
+  const API_BASE_URL = chatBaseUrl;
+
+  // Use URL constructor to handle path joining properly
+  const constructWebSocketUrl = (baseUrl, path, userId) => {
+    // Check if baseUrl is valid and not empty
+    if (!baseUrl || typeof baseUrl !== 'string' || baseUrl.trim() === '') {
+      console.warn('Invalid baseUrl provided:', baseUrl);
+      return ''; // Return empty string to avoid connection attempts
+    }
+    
+    try {
+      const url = new URL(baseUrl);
+      const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = new URL(`${wsProtocol}//${url.host}`);
+      
+      // Handle path (remove leading slash if present to avoid double slash)
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      wsUrl.pathname = cleanPath;
+      
+      // Add query parameter
+      wsUrl.searchParams.set('user_id', userId);
+      
+      return wsUrl.toString();
+    } catch (error) {
+      console.error('Error constructing WebSocket URL:', error);
+      // Fallback to simple construction
+      const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
+      const wsBaseUrl = cleanBaseUrl.replace(/^http/, 'ws');
+      return `${wsBaseUrl}${path.startsWith('/') ? path : '/' + path}?user_id=${userId}`;
+    }
+  };
+
+  const WS_URL = chatBaseUrl ? constructWebSocketUrl(API_BASE_URL, path, userId) : '';
 
   const connect = () => {
     if (chatBaseUrl === "") {
