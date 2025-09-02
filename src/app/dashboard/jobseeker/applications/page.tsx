@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -12,22 +12,28 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Building } from "lucide-react";
+import { Spinner } from "@/components/ui/kibo-ui/spinner";
+import { CalendarDays, Building, FileText } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "@/config/firebase";
 
-// ---- Firestore (client SDK) ----
-import { db } from "@/config/firebase"; // your initialized client db
-import {
-  collection, onSnapshot, orderBy, query, Timestamp,
-} from "firebase/firestore";
-
-type AppRow = {
-  id: string;              // doc id (job_id)
-  position: string;        // top-level 'title' (or from snapshot fallback)
-  company: string;         // job_snapshot.company
-  location: string;        // job_snapshot.location
-  appliedDate: Date;       // created_at (ms or Timestamp)
-  status: "applied" | "interview" | "rejected" | "accepted" | string;
+type Application = {
+  id: string;
+  company: string;
+  job_id: string;
+  location: string;
+  poster_id: string;
+  salary_max: number;
+  salary_min: number;
+  score: number;
+  source: string;
+  status: string;
+  created_at: number;
+  updated_at: number;
+  title: string;
+  user_id: string;
+  tags: string[];
 };
 
 const statusColors: Record<string, string> = {
@@ -37,74 +43,111 @@ const statusColors: Record<string, string> = {
   accepted: "bg-blue-100 text-blue-800 border-blue-200",
 };
 
-function toDate(v: unknown): Date {
-  if (!v) return new Date(0);
-  // Firestore Timestamp
-  if (typeof v === "object" && v !== null && "toDate" in (v as { toDate?: () => Date })) {
-    return (v as Timestamp).toDate();
-  }
-  // epoch ms
-  if (typeof v === "number") return new Date(v);
-  return new Date(0);
-}
-
 export default function ApplicationsPage() {
   const { user } = useAuth();
-  const [filter, setFilter] = useState<string>("all");
-  const [rows, setRows] = useState<AppRow[]>([]);
+  const [filter, setFilter] = useState("all");
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    const fetchApplications = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
 
-    // /jobseekers/{uid}/jobs_applied (ordered newest first)
-    const q = query(
-      collection(db, "jobseekers", user.id, "jobs_applied"),
-      orderBy("created_at", "desc"),
-    );
+      try {
+        setLoading(true);
+        setError(null);
 
-    const unsub = onSnapshot(q, (snap) => {
-      const next = snap.docs.map((d) => {
-        const data = d.data() || {};
-        type JobSnapshot = {
-          title?: string;
-          company?: string;
-          location?: string;
-        };
-        const js = (data.job_snapshot ?? {}) as JobSnapshot;
+        // Query the subcollection: jobseekers/{userId}/jobs_applied
+        const applicationsRef = collection(
+          db,
+          "jobseekers",
+          user.id,
+          "jobs_applied"
+        );
+        const q = query(applicationsRef, orderBy("created_at", "desc"));
+        const querySnapshot = await getDocs(q);
 
-        const row: AppRow = {
-          id: d.id,
-          position: (data.title as string) || (js.title as string) || "(untitled)",
-          company: (js.company as string) || "—",
-          location: (js.location as string) || "—",
-          appliedDate: toDate(data.created_at),
-          status: (data.status as string) || "applied",
-        };
-        return row;
-      });
-      setRows(next);
-      setLoading(false);
-    });
+        const applicationsData: Application[] = [];
+        querySnapshot.forEach((doc) => {
+          applicationsData.push({
+            id: doc.id,
+            ...doc.data(),
+          } as Application);
+        });
 
-    return () => unsub();
-  }, [user?.id]);
+        setApplications(applicationsData);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+        setError("Failed to load applications. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filtered = useMemo(
-    () => rows.filter((r) => (filter === "all" ? true : r.status === filter)),
-    [rows, filter],
+    fetchApplications();
+  }, [user]);
+
+  const filteredApplications = applications.filter((app) =>
+    filter === "all" ? true : app.status === filter
   );
+
+  // Format date function
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Format salary range
+  const formatSalary = (min: number, max: number) => {
+    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+  };
+
+  if (loading) {
+    return (
+      <ProtectedRoute allowedRoles={["jobseeker"]}>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Spinner />
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (error) {
+    return (
+      <ProtectedRoute allowedRoles={["jobseeker"]}>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Card className="p-8 text-center">
+            <h3 className="text-lg font-semibold text-red-600 mb-2">Error</h3>
+            <p className="text-muted-foreground">{error}</p>
+          </Card>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute allowedRoles={["jobseeker"]}>
-      <div>
+      <div className="p-4">
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle>My Applications</CardTitle>
                 <CardDescription>
-                  Track your job applications in real time
+                  Track your job applications and their status
+                  {applications.length > 0 && (
+                    <span className="ml-2">
+                      ({applications.length} application
+                      {applications.length !== 1 ? "s" : ""})
+                    </span>
+                  )}
                 </CardDescription>
               </div>
 
@@ -115,62 +158,102 @@ export default function ApplicationsPage() {
                 <SelectContent>
                   <SelectItem value="all">All Applications</SelectItem>
                   <SelectItem value="applied">Applied</SelectItem>
+                  <SelectItem value="in review">In Review</SelectItem>
                   <SelectItem value="interview">Interview</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="hired">Hired</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardHeader>
 
           <CardContent>
-            {loading ? (
-              <div className="text-sm text-muted-foreground">Loading…</div>
-            ) : filtered.length === 0 ? (
-              <div className="text-sm text-muted-foreground">
-                {filter === "all" ? "No applications yet." : `No ${filter} applications.`}
+            {applications.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No Applications Yet
+                </h3>
+                <p className="text-muted-foreground">
+                  You haven't applied to any jobs yet. Start exploring
+                  opportunities!
+                </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Applied Date</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((app) => (
-                    <TableRow key={app.id}>
-                      <TableCell className="font-medium">{app.position}</TableCell>
-
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Building className="h-4 w-4 text-muted-foreground" />
-                          {app.company}
-                        </div>
-                      </TableCell>
-
-                      <TableCell>{app.location}</TableCell>
-
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                          {app.appliedDate.toLocaleDateString()}
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge className={statusColors[app.status] ?? "bg-gray-100 text-gray-800 border-gray-200"}>
-                          {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                        </Badge>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Position</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Salary Range</TableHead>
+                      <TableHead>Applied Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Score</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredApplications.map((app) => (
+                      <TableRow key={app.id}>
+                        <TableCell className="font-medium">
+                          <div>
+                            <div className="font-semibold">{app.title}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-muted-foreground" />
+                            {app.company}
+                          </div>
+                        </TableCell>
+                        <TableCell>{app.location}</TableCell>
+                        <TableCell className="text-sm">
+                          {formatSalary(app.salary_min, app.salary_max)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                            {formatDate(app.created_at)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              statusColors[
+                                app.status as keyof typeof statusColors
+                              ] ||
+                              "bg-slate-100 text-slate-800 border-slate-200"
+                            }
+                          >
+                            {app.status.charAt(0).toUpperCase() +
+                              app.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-medium">
+                              {app.score}%
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              match
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            {filteredApplications.length === 0 && applications.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No applications found for the selected filter.
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>

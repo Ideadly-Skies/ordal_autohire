@@ -25,7 +25,6 @@ export function LogoutButton({
       onClick={handleLogout}
       size="sm"
     >
-      <LogOut size={10} />
       <span>Logout</span>
     </Button>
   );

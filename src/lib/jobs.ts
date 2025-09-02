@@ -1,19 +1,5 @@
 import { db } from "../../server/firebaseAdmin";
-
-export type Job = {
-  id: string;
-  title: string;
-  company: string;
-  description?: string;
-  location?: string;
-  salary_min?: number;
-  salary_max?: number;
-  created_at?: number;
-  poster_id?: string;
-  poster_name?: string;
-  edition_prices?: Record<string, number>;
-  status?: string;
-};
+import { Job } from "../../types/jobs";
 
 export async function listJobs(opts?: {
   limit?: number;

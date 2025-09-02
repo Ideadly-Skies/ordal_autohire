@@ -20,15 +20,18 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
+import { doc, updateDoc } from "firebase/firestore";
+
+import toast from "react-hot-toast";
+import { db } from "@/config/firebase";
 
 interface UploadModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open: boolean, uploaded?: boolean) => void;
 }
 
 export function UploadModal({ open, onOpenChange }: UploadModalProps) {
   const router = useRouter();
-  // const [userId, setUserId] = useState("USER_001");
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [skillsMode, setSkillsMode] = useState<"add" | "replace">("add");
@@ -76,11 +79,9 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
         return;
       }
 
-      // Create a DataTransfer object to update the file input
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(droppedFile);
 
-      // Get the file input element and update its files
       const fileInput = document.querySelector(
         'input[type="file"]'
       ) as HTMLInputElement;
@@ -119,7 +120,6 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
     setFile(null);
     setPreviewUrl(null);
     setErr(null);
-    // Clear the file input when removing the file
     const fileInput = document.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
@@ -128,8 +128,42 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
     }
   };
 
-  // Update the file input to use a ref instead of querySelector
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClose = (uploaded: boolean = false) => {
+    setFile(null);
+    setPreviewUrl(null);
+    setErr(null);
+    setSkillsMode("add");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    onOpenChange(false, uploaded);
+  };
+
+  const updateUserUploadStatus = async () => {
+    if (!user?.id) {
+      console.error("No user ID available");
+      return false;
+    }
+
+    try {
+      const userRef = doc(db, "jobseekers", user.id);
+      await updateDoc(userRef, {
+        upload_cv: true,
+        cv_uploaded_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      console.log("Successfully updated upload_cv to true");
+      return true;
+    } catch (error) {
+      console.error("Error updating upload_cv status:", error);
+      toast.error("Failed to update profile status");
+      return false;
+    }
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -152,8 +186,15 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error || `Upload failed (${res.status})`);
       }
-      onOpenChange(false);
-      router.push("/dashboard");
+
+      // Update Firestore upload status
+      const updateSuccess = await updateUserUploadStatus();
+
+      if (updateSuccess) {
+        toast.success("CV uploaded and parsed successfully!");
+        handleClose(true);
+        router.push("/dashboard/jobseeker");
+      }
     } catch (e) {
       if (e instanceof Error) {
         setErr(e.message || "Something went wrong.");
@@ -166,24 +207,20 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleClose(false);
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Upload Your ATS CV</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="space-y-3">
-          {/* <div>
-            <label className="block text-sm font-medium">User ID</label>
-            <input
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
-              placeholder="USER_001"
-              required
-            />
-          </div> */}
-
           <div className="relative">
             {busy && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl z-50">
@@ -236,13 +273,7 @@ export function UploadModal({ open, onOpenChange }: UploadModalProps) {
                   <Button
                     variant="outline"
                     className="mt-4"
-                    onClick={() =>
-                      (
-                        document.querySelector(
-                          'input[type="file"]'
-                        ) as HTMLInputElement | null
-                      )?.click()
-                    }
+                    onClick={() => fileInputRef.current?.click()}
                     type="button"
                   >
                     <UploadIcon className="-ms-1 size-4 opacity-60" />

@@ -1,7 +1,12 @@
+import Image from "next/image";
+
 export const Logo = () => {
   return (
-    <h1 className="font-bold">
-      Ordal <span className="font-light">AutoHire</span>
-    </h1>
+    <Image
+      src="/logo/main-logo.webp"
+      alt="Ordal AutoHire"
+      width={100}
+      height={40}
+    />
   );
 };
