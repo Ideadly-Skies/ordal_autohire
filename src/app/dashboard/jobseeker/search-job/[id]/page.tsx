@@ -132,8 +132,8 @@ export default async function JobDetailsPage({
   const companyProfileImage = companyData?.profile_image; // Get profile image
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4">
+      <div className="">
         <div>
           {/* Back Button */}
           <div className="flex items-center gap-4 mb-6">

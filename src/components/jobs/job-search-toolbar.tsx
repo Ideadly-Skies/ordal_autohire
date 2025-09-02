@@ -12,7 +12,7 @@ export function JobSearchToolbar({
 }) {
   return (
     <form
-      className="flex justify-between px-4 md:flex-row flex-col gap-3"
+      className="flex justify-between md:flex-row flex-col gap-3"
       action="/dashboard/search-job"
       method="get" // submit as GET (?q=...)
     >

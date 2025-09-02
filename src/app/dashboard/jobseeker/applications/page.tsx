@@ -149,7 +149,7 @@ export default function ApplicationsPage() {
 
   return (
     <ProtectedRoute allowedRoles={["jobseeker"]}>
-      <div className="">
+      <div className="p-4">
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">

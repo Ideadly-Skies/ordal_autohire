@@ -5,8 +5,8 @@ import { ProtectedRoute } from "@/components/protected-route";
 
 export default function UserDashboardPage() {
   return (
-    <div className="min-h-screen  py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen">
+      <div className="w-full p-4">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <div className="w-full lg:w-80">

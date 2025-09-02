@@ -128,10 +128,10 @@ export default async function Page({
     : jobs;
 
   return (
-    <>
+    <div className="p-4">
       <JobSearchToolbar defaultQuery={q} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-3 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
         {filtered.map((job) => (
           <JobCard key={job.id} job={job} />
         ))}
@@ -143,6 +143,6 @@ export default async function Page({
       </div>
 
       <Pagination currentPage={page} totalPages={totalPages} query={q} />
-    </>
+    </div>
   );
 }

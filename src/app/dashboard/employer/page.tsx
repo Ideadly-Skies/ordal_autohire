@@ -179,7 +179,7 @@ export default function CompanyOverview() {
 
   return (
     <div className="min-h-screen">
-      <div className=" px-4 py-4 sm:py-6 lg:py-8">
+      <div className=" p-4">
         {/* Company Info Card */}
         <div className="mb-8 flex justify-between items-start">
           <div className="flex flex-col gap-2">

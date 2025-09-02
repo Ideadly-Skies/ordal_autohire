@@ -291,7 +291,7 @@ export default function CandidatesListPage() {
 
   return (
     <div className="min-h-screen">
-      <div className=" mx-auto px-4 py-8">
+      <div className=" mx-auto p-4">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Candidates</h1>
@@ -351,7 +351,7 @@ export default function CandidatesListPage() {
               key={candidate.id + "" + candidate.job_id}
               className="bg-white border border-border hover:shadow-md transition-shadow"
             >
-              <CardContent className="p-6">
+              <CardContent className="px-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
                     <Avatar className="w-12 h-12">
