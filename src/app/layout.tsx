@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import "@/styles/App.css"
+import "@/styles/index.css"
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
+import PopUpPreview from "./PopUpPreview";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +50,15 @@ export default function RootLayout({
             {/* Your Content/Components */}
             <Toaster />
             {children}
+            {/* persistent floating chat widget */}
+            <PopUpPreview />
+            <Script
+              id="midtrans-snap"
+              src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL!}
+              data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+              strategy="afterInteractive"
+            />
+
             <AnimatedThemeToggler className="fixed bottom-6 right-6" />
           </ThemeProvider>
         </AuthProvider>

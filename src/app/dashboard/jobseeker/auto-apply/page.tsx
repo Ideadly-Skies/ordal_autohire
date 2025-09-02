@@ -1,22 +1,37 @@
 'use client'
+import { useCallback, useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Check } from "lucide-react"
+  Card, CardContent, CardFooter, CardHeader, CardTitle,
+} from "@/components/ui/card";
+
+// Extend the Window interface to include 'snap' with the 'pay' method
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        options: {
+          onSuccess?: (result: unknown) => void;
+          onPending?: (result: unknown) => void;
+          onError?: (error: unknown) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 
 type Plan = {
   name: "Free" | "Pro";
-  price: string;
+  price: string;          // display only
+  amountIdr?: number;     // <-- numeric price for Midtrans (IDR). Only for paid plans.
   cta: string;
-  features: string[];     // prefix with "!" to render a red “negative” item
+  features: string[];
   highlight: "popular" | "recommended";
-}
+};
 
 const plans: Plan[] = [
   {
@@ -36,6 +51,7 @@ const plans: Plan[] = [
   {
     name: "Pro",
     price: "$119",
+    amountIdr: 1790000, // <-- set the real IDR price you want to charge
     cta: "Upgrade to Pro",
     highlight: "recommended",
     features: [
@@ -50,16 +66,21 @@ const plans: Plan[] = [
   },
 ];
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({
+  plan,
+  onCheckout,
+  loadingFor,
+}: {
+  plan: Plan;
+  onCheckout: (p: Plan) => void;
+  loadingFor: string | null;
+}) {
   const isPlus = plan.name === "Free";
-  const isPro = plan.name === "Pro";
-
   const ribbon =
     plan.highlight === "popular"
       ? { text: "Most Popular", className: "bg-orange-600 text-white" }
       : { text: "Recommended", className: "bg-teal-600 text-white" };
 
-  // visual styles per card (match screenshot #2 while fitting your dark theme)
   const cardBase =
     "relative h-full flex flex-col transition-shadow shadow-sm border-muted-foreground/20";
   const cardStyle = isPlus
@@ -69,6 +90,8 @@ function PlanCard({ plan }: { plan: Plan }) {
   const buttonStyle = isPlus
     ? "bg-orange-600 hover:bg-orange-700"
     : "bg-teal-600 hover:bg-teal-700";
+
+  const disabled = loadingFor === plan.name;
 
   return (
     <Card className={cardStyle}>
@@ -100,17 +123,93 @@ function PlanCard({ plan }: { plan: Plan }) {
       </CardContent>
 
       <CardFooter className="mt-auto">
-        <Button className={`w-full ${buttonStyle}`}>{plan.cta}</Button>
+        <Button
+          className={`w-full ${buttonStyle}`}
+          disabled={disabled}
+          onClick={() => onCheckout(plan)}
+        >
+          {disabled ? "Processing..." : plan.cta}
+        </Button>
       </CardFooter>
     </Card>
   );
 }
 
 export default function Page() {
+  const [loadingFor, setLoadingFor] = useState<string | null>(null);
+
+  const checkout = useCallback(async (plan: Plan) => {
+    try {
+      // Free plan → no payment. Put your own flow here (e.g., enable features, route to dashboard)
+      if (plan.name === "Free") {
+        // e.g., router.push("/onboarding")
+        console.log("Activated Free plan");
+        return;
+      }
+
+      // Safety: ensure Snap is loaded
+      if (!window.snap) {
+        alert("Payment module not ready. Please refresh the page.");
+        return;
+      }
+
+      if (!plan.amountIdr) {
+        alert("Missing price for this plan.");
+        return;
+      }
+
+      setLoadingFor(plan.name);
+
+      // 1) ask the server for a Midtrans Snap token
+      const res = await fetch("/api/midtrans/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: `PRO-${Date.now()}`,
+          amount: plan.amountIdr,
+          customer: {
+            first_name: "Obie", // Optional: hydrate from your user profile
+            email: "obie@example.com",
+            phone: "08123456789",
+          },
+          items: [
+            { id: "pro-subscription", price: plan.amountIdr, quantity: 1, name: "Pro Plan (Monthly)" },
+          ],
+        }),
+      });
+
+      const { token } = await res.json();
+      if (!token) throw new Error("No token from server");
+
+      // 2) open Snap popup
+      window.snap.pay(token, {
+        onSuccess: async (result: unknown) => {
+          console.log("✅ Success", result);
+          // TODO: mark user as Pro in your DB
+        },
+        onPending: (result: unknown) => {
+          console.log("⏳ Pending", result);
+        },
+        onError: (error: unknown) => {
+          console.error("❌ Error", error);
+          alert("Payment failed. Please try again.");
+        },
+        onClose: () => {
+          console.warn("Popup closed by user");
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Failed to start payment.");
+    } finally {
+      setLoadingFor(null);
+    }
+  }, []);
+
   return (
     <main className="mx-auto max-w-6xl h-full px-4 py-16">
       <div className="grid items-center gap-12 md:grid-cols-2">
-        {/* LEFT: keep hero aesthetics from screenshot #1 */}
+        {/* LEFT */}
         <section className="space-y-6">
           <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight tracking-tight">
             Try Auto Apply
@@ -118,10 +217,12 @@ export default function Page() {
           <p className="text-muted-foreground max-w-prose">
             Our system matches your skills with openings and submits applications instantly.
           </p>
-          <Button size="lg" className="px-8">Get Started</Button>
+          <Button size="lg" className="px-8" onClick={() => checkout(plans[0])}>
+            Get Started
+          </Button>
         </section>
 
-        {/* RIGHT: container styled like screenshot #2 */}
+        {/* RIGHT */}
         <section>
           <Card className="border-muted-foreground/20 bg-muted p-6 shadow-sm max-w-3xl w-full">
             <CardHeader className="pb-4">
@@ -134,12 +235,11 @@ export default function Page() {
             <CardContent>
               <div className="grid gap-6 sm:grid-cols-2 grid-cols-1">
                 {plans.map((plan) => (
-                  <PlanCard key={plan.name} plan={plan} />
+                  <PlanCard key={plan.name} plan={plan} onCheckout={checkout} loadingFor={loadingFor} />
                 ))}
               </div>
             </CardContent>
 
-            {/* Quiet footer to preserve spacing (no extras, per screenshot #1 vibe) */}
             <CardFooter className="flex flex-col gap-3 text-xs text-muted-foreground" />
           </Card>
         </section>

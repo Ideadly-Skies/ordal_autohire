@@ -3,26 +3,13 @@
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/kibo-ui/spinner";
@@ -49,13 +36,11 @@ type Application = {
   tags: string[];
 };
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   applied: "bg-yellow-100 text-yellow-800 border-yellow-200",
   interview: "bg-green-100 text-green-800 border-green-200",
   rejected: "bg-red-100 text-red-800 border-red-200",
   accepted: "bg-blue-100 text-blue-800 border-blue-200",
-  "in review": "bg-purple-100 text-purple-800 border-purple-200",
-  hired: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 export default function ApplicationsPage() {
@@ -110,18 +95,51 @@ export default function ApplicationsPage() {
     filter === "all" ? true : app.status === filter
   );
 
-  // Format date function
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString("en-US", {
+  // Accept optional/unknown values and be defensive.
+  const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+  function toNum(v: unknown): number | null {
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+    if (typeof v === "string" && v.trim() !== "") {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  }
+
+  const formatSalary = (min: unknown, max: unknown) => {
+    const a = toNum(min);
+    const b = toNum(max);
+    if (a == null && b == null) return "—";
+    if (a != null && b != null) return `$${nf.format(a)} - $${nf.format(b)}`;
+    const only = a ?? b!;
+    return `$${nf.format(only)}`;
+  };
+
+  // Firestore Timestamp-safe date formatter
+  const formatDate = (ts: unknown) => {
+    // Support Firestore Timestamp, millis number, or millis string
+    const ms =
+      (ts &&
+        typeof ts === "object" &&
+        ts !== null &&
+        "toMillis" in ts &&
+        typeof (ts as { toMillis: unknown }).toMillis === "function"
+        ? // Firestore Timestamp
+          (ts as { toMillis: () => number }).toMillis()
+        : typeof ts === "number"
+        ? ts
+        : typeof ts === "string"
+        ? Number(ts)
+        : NaN);
+
+    if (!Number.isFinite(ms)) return "—";
+
+    return new Date(ms).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
-
-  // Format salary range
-  const formatSalary = (min: number, max: number) => {
-    return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
   };
 
   if (loading) {
@@ -165,6 +183,7 @@ export default function ApplicationsPage() {
                   )}
                 </CardDescription>
               </div>
+
               <Select value={filter} onValueChange={setFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
@@ -181,6 +200,7 @@ export default function ApplicationsPage() {
               </Select>
             </div>
           </CardHeader>
+
           <CardContent>
             {applications.length === 0 ? (
               <div className="text-center py-12">
@@ -189,7 +209,7 @@ export default function ApplicationsPage() {
                   No Applications Yet
                 </h3>
                 <p className="text-muted-foreground">
-                  You haven't applied to any jobs yet. Start exploring
+                  You haven&apos;t applied to any jobs yet. Start exploring
                   opportunities!
                 </p>
               </div>
