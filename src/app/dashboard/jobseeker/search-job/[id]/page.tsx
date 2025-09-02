@@ -10,6 +10,9 @@ import {
   Users,
   Check,
   Star,
+  Globe,
+  Mail,
+  Building,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,11 +45,25 @@ export default async function JobDetailsPage({
   type JobPoster = {
     id: string;
     company_name: string;
+    about_company?: string;
+    industry?: string;
+    employee_count?: string;
+    location?: string;
+    website?: string;
+    contact_email?: string;
+    personal_info?: {
+      name: string;
+      email: string;
+    };
+    plan?: string;
+    accountType?: string;
   };
 
   const { id } = await params;
 
-  async function getJobById(jobId: string): Promise<Job | null> {
+  async function getJobById(
+    jobId: string
+  ): Promise<(Job & { company_data?: JobPoster }) | null> {
     try {
       const docRef = doc(db, "jobs", jobId);
       const docSnap = await getDoc(docRef);
@@ -55,13 +72,14 @@ export default async function JobDetailsPage({
 
       const data = docSnap.data() as Omit<Job, "id" | "poster_name">;
       let posterName: string | undefined;
+      let companyData: JobPoster | undefined;
 
       if (data.poster_id) {
         const posterRef = doc(db, "jobposters", data.poster_id);
         const posterSnap = await getDoc(posterRef);
         if (posterSnap.exists()) {
-          const posterData = posterSnap.data() as JobPoster;
-          posterName = posterData.company_name;
+          companyData = posterSnap.data() as JobPoster;
+          posterName = companyData.company_name;
         }
       }
 
@@ -69,6 +87,7 @@ export default async function JobDetailsPage({
         id: docSnap.id,
         ...data,
         poster_name: posterName,
+        company_data: companyData,
       };
     } catch (error) {
       console.error("Error fetching job:", error);
@@ -76,7 +95,7 @@ export default async function JobDetailsPage({
     }
   }
 
-  const job: Job | null = await getJobById(id);
+  const job = await getJobById(id);
 
   if (!job) {
     return (
@@ -99,6 +118,16 @@ export default async function JobDetailsPage({
     addSuffix: true,
   });
   const postedDate = format(new Date(job.created_at), "MMM d, yyyy");
+
+  // Get company data with fallbacks
+  const companyData = job.company_data;
+  const companyName = companyData?.company_name || job.company;
+  const companyLocation = companyData?.location || job.location;
+  const companyIndustry = companyData?.industry || "Technology Company";
+  const companySize = companyData?.employee_count || "Unknown size";
+  const companyWebsite = companyData?.website;
+  const companyEmail = companyData?.contact_email;
+  const companyAbout = companyData?.about_company || job.description;
 
   return (
     <div className="min-h-screen">
@@ -127,14 +156,14 @@ export default async function JobDetailsPage({
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
                         <AvatarFallback className="bg-blue-600 text-white text-xl font-bold">
-                          {job.company.charAt(0).toUpperCase()}
+                          {companyName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <h1 className="text-2xl font-bold">{job.title}</h1>
                         <div className="flex items-center gap-2">
                           <span className="text-lg text-blue-600">
-                            {job.company}
+                            {companyName}
                           </span>
                           <MdVerified className="inline text-green-600" />
                         </div>
@@ -169,6 +198,23 @@ export default async function JobDetailsPage({
                       </span>
                     </div>
                   </div>
+
+                  {/* Tags */}
+                  {job.tags && job.tags.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {job.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Bottom Row */}
                   <div className="flex items-center justify-between text-sm">
@@ -253,32 +299,84 @@ export default async function JobDetailsPage({
                 </CardContent>
               </Card>
 
+              {/* Company Information Card */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">About {job.company}</CardTitle>
+                  <CardTitle className="text-lg">About {companyName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-start gap-3 mb-4">
                     <Avatar className="h-12 w-12">
                       <AvatarFallback className="bg-blue-600 text-white font-bold">
-                        {job.company.charAt(0).toUpperCase()}
+                        {companyName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold">{job.company}</h3>
-                      <p className="text-sm">Technology Company</p>
+                      <h3 className="font-semibold">{companyName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {companyIndustry}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {companySize}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-sm mb-4">
-                    {job.company} is committed to providing innovative solutions
-                    and creating a positive work environment for all employees.
+
+                  {/* Company Details */}
+                  <div className="space-y-3 mb-4">
+                    {companyLocation && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{companyLocation}</span>
+                      </div>
+                    )}
+
+                    {companyWebsite && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <a
+                          href={companyWebsite}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {companyWebsite
+                            .replace("https://", "")
+                            .replace("http://", "")}
+                        </a>
+                      </div>
+                    )}
+
+                    {companyEmail && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <a
+                          href={`mailto:${companyEmail}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {companyEmail}
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building className="h-4 w-4 text-muted-foreground" />
+                      <span>{companyIndustry}</span>
+                    </div>
+                  </div>
+
+                  {/* Company Description */}
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                    {companyAbout}
                   </p>
-                  <Button variant="outline" className="w-full bg-transparent">
+
+                  {/* <Button variant="outline" className="w-full bg-transparent">
                     View Company Profile
-                  </Button>
+                  </Button> */}
                 </CardContent>
               </Card>
 
+              {/* Job Details Card */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Job Details</CardTitle>
@@ -303,6 +401,20 @@ export default async function JobDetailsPage({
                     <span className="text-sm font-medium">
                       {job.experience}
                     </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Industry:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {companyIndustry}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Company Size:
+                    </span>
+                    <span className="text-sm font-medium">{companySize}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">

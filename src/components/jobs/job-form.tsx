@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,10 +28,11 @@ import {
   Building,
   CheckCircle,
   Star,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { Job } from "../../../types/jobs";
 import { FormSection } from "./form-section";
@@ -49,9 +50,10 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [companyName, setCompanyName] = useState("");
 
   const [formData, setFormData] = useState<Job>({
-    id: initialData?.id, // Add this line to preserve the job ID
+    id: initialData?.id,
     title: initialData?.title || "",
     company: initialData?.company || "",
     location: initialData?.location || "",
@@ -63,15 +65,47 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
     description: initialData?.description || "",
     requirements: initialData?.requirements || [""],
     offers: initialData?.offers || [""],
+    tags: initialData?.tags || [""], // Add tags field
     created_at: initialData?.created_at || new Date().toISOString(),
     applicants: initialData?.applicants || 0,
-    status: initialData?.status || "open", // Default to "open"
+    status: initialData?.status || "open",
   });
 
+  // Fetch company name from jobposters collection
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      if (!user?.id) return;
+
+      try {
+        const jobposterRef = doc(db, "jobposters", user.id);
+        const jobposterSnap = await getDoc(jobposterRef);
+
+        if (jobposterSnap.exists()) {
+          const jobposterData = jobposterSnap.data();
+          const fetchedCompanyName = jobposterData.company_name || "";
+          setCompanyName(fetchedCompanyName);
+
+          // Set company name in form data if not editing or if company field is empty
+          if (!isEditing || !formData.company) {
+            setFormData((prev) => ({
+              ...prev,
+              company: fetchedCompanyName,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching company name:", error);
+        toast.error("Failed to fetch company information");
+      }
+    };
+
+    fetchCompanyName();
+  }, [user?.id, isEditing]);
+
+  // Update the validateForm function to remove company validation:
   const validateForm = () => {
     const requiredFields = {
       title: "Job Title",
-      company: "Company Name",
       location: "Location",
       experience: "Years of Experience",
       salary_min: "Minimum Salary",
@@ -141,7 +175,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
 
     const cleanedData = {
       title: formData.title || "",
-      company: formData.company || "",
+      company: formData.company || companyName, // Use fetched company name as fallback
       location: formData.location || "",
       work_mode: formData.work_mode || "Remote",
       type: formData.type || "Full-time",
@@ -151,16 +185,16 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
       description: formData.description || "",
       requirements: formData.requirements.filter((req) => req.trim() !== ""),
       offers: formData.offers.filter((offer) => offer.trim() !== ""),
+      tags: formData.tags.filter((tag) => tag.trim() !== ""), // Add tags to cleaned data
       created_at: formData.created_at || new Date().toISOString(),
       applicants: formData.applicants || 0,
       poster_id: user?.id || "",
-      status: formData.status || "open", // Automatically set to "open" for new jobs
+      status: formData.status || "open",
     };
 
     try {
       if (isEditing && formData.id) {
         const jobRef = doc(db, "jobs", formData.id);
-        // Remove the id from the data being updated (Firebase doesn't allow updating the document ID)
         await updateDoc(jobRef, cleanedData);
 
         toast.success(`Job "${formData.title}" updated successfully!`, {
@@ -176,7 +210,6 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
         console.log("New job created with ID:", docRef.id);
       }
 
-      // Redirect after a short delay to show the success message
       setTimeout(() => {
         router.push("/dashboard/employer/jobs");
       }, 1500);
@@ -201,6 +234,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Functions for requirements
   const addRequirement = () => {
     setFormData((prev) => ({
       ...prev,
@@ -231,6 +265,7 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
     }));
   };
 
+  // Functions for offers
   const addOffer = () => {
     setFormData((prev) => ({
       ...prev,
@@ -259,6 +294,30 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
     }));
   };
 
+  // Functions for tags
+  const addTag = () => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: [...prev.tags, ""],
+    }));
+    toast.success("New tag field added");
+  };
+
+  const removeTag = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((_, i) => i !== index),
+    }));
+    toast.success("Tag removed");
+  };
+
+  const updateTag = (index: number, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.map((tag, i) => (i === index ? value : tag)),
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -282,18 +341,6 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 disabled={isSubmitting}
               />
             </FormField>
-            <FormField label="Company Name" required>
-              <Input
-                value={formData.company}
-                onChange={(e) => handleChange("company", e.target.value)}
-                placeholder="e.g. TechCorp Inc."
-                required
-                disabled={isSubmitting}
-              />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Location" required>
               <Input
                 value={formData.location}
@@ -303,6 +350,9 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 disabled={isSubmitting}
               />
             </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Work Mode">
               <Select
                 value={formData.work_mode}
@@ -319,9 +369,6 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 </SelectContent>
               </Select>
             </FormField>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField label="Employment Type">
               <Select
                 value={formData.type}
@@ -340,6 +387,9 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 </SelectContent>
               </Select>
             </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField label="Years of Experience" required>
               <Input
                 value={formData.experience}
@@ -349,9 +399,6 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 disabled={isSubmitting}
               />
             </FormField>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField label="Minimum Salary" required>
               <Input
                 value={formData.salary_min}
@@ -370,6 +417,9 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
                 disabled={isSubmitting}
               />
             </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
             <FormField label="Job Status" required>
               <Select
                 value={formData.status}
@@ -431,6 +481,44 @@ export function JobForm({ initialData, isEditing = false }: JobFormProps) {
             placeholder="e.g. Competitive salary package"
             addButtonText="Add Benefit"
           />
+        </FormSection>
+
+        <FormSection title="Tags" icon={Tag}>
+          <FormField label="Tags (separate with commas)">
+            <Input
+              value={formData.tags.join(", ")}
+              onChange={(e) => {
+                const tagsString = e.target.value;
+                const tagsArray = tagsString
+                  .split(",")
+                  .map((tag) => tag.trim())
+                  .filter((tag) => tag !== "");
+                handleChange("tags", tagsArray);
+              }}
+              placeholder="e.g. React, JavaScript, Frontend, Remote, Full-time"
+              disabled={isSubmitting}
+            />
+          </FormField>
+          <div className="text-sm text-muted-foreground">
+            Enter tags separated by commas. Example: React, JavaScript, Frontend
+          </div>
+
+          {/* Preview tags */}
+          {formData.tags.length > 0 && formData.tags[0] !== "" && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.tags.map(
+                (tag, index) =>
+                  tag.trim() && (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-800 text-xs font-medium"
+                    >
+                      {tag}
+                    </span>
+                  )
+              )}
+            </div>
+          )}
         </FormSection>
 
         {isEditing && (

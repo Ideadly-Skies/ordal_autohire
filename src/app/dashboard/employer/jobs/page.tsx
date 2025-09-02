@@ -66,10 +66,23 @@ export default function JobsPage() {
         const q = query(jobsRef, where("poster_id", "==", user.id));
         const snapshot = await getDocs(q);
 
-        const jobsData: Job[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Job[];
+        const jobsData: Job[] = [];
+
+        // Fetch jobs and their applicant counts
+        for (const jobDoc of snapshot.docs) {
+          const jobData = jobDoc.data();
+
+          // Get applicants count from subcollection
+          const applicantsRef = collection(db, "jobs", jobDoc.id, "applicants");
+          const applicantsSnapshot = await getDocs(applicantsRef);
+          const applicantsCount = applicantsSnapshot.size;
+
+          jobsData.push({
+            id: jobDoc.id,
+            ...jobData,
+            applicants: applicantsCount, // Override with actual count from subcollection
+          } as Job);
+        }
 
         setJobs(jobsData);
       } catch (err) {
@@ -84,10 +97,22 @@ export default function JobsPage() {
 
   const handleDeleteJob = async (jobId: string) => {
     try {
+      // First, delete all applicants in the subcollection
+      const applicantsRef = collection(db, "jobs", jobId, "applicants");
+      const applicantsSnapshot = await getDocs(applicantsRef);
+
+      // Delete each applicant document
+      const deletePromises = applicantsSnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref)
+      );
+      await Promise.all(deletePromises);
+
+      // Then delete the job document
       await deleteDoc(doc(db, "jobs", jobId));
+
       // Refresh the jobs list
       setJobs(jobs.filter((job) => job.id !== jobId));
-      console.log("Job deleted successfully");
+      console.log("Job and all applicants deleted successfully");
     } catch (error) {
       console.error("Error deleting job:", error);
       alert("Error deleting job. Please try again.");
@@ -101,6 +126,9 @@ export default function JobsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Job Listings</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your job postings and track applications
+            </p>
           </div>
           <Link href="/dashboard/employer/jobs/new">
             <Button>Add New Post</Button>
@@ -108,7 +136,11 @@ export default function JobsPage() {
         </div>
 
         {/* Loading State */}
-        {loading && <p className="text-muted-foreground">Loading jobs...</p>}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-muted-foreground">Loading jobs...</div>
+          </div>
+        )}
 
         {/* Job List */}
         <div className="space-y-4">
@@ -117,7 +149,12 @@ export default function JobsPage() {
               <Card key={job.id} className="hover:shadow-sm transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-xl">{job.title}</CardTitle>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl">{job.title}</CardTitle>
+                      <p className="text-muted-foreground text-sm mt-1">
+                        {job.company}
+                      </p>
+                    </div>
                     <div className="flex gap-2">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -153,6 +190,18 @@ export default function JobsPage() {
 
                             <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
                               <div className="flex items-center gap-2 text-sm">
+                                <Building className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">
+                                  {job.company}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">
+                                  {job.location}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
                                 <MonitorCog className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-muted-foreground">
                                   {job.work_mode}
@@ -178,13 +227,28 @@ export default function JobsPage() {
                               </div>
                             </div>
 
+                            {/* Tags Section */}
+                            {job.tags && job.tags.length > 0 && (
+                              <div>
+                                <h4 className="font-medium mb-3">Tags</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {job.tags.map((tag, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             <div className="flex items-center gap-4 text-sm text-muted-foreground border-t pt-4">
                               <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {job.location}
-                              </div>
-                              <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
+                                Posted{" "}
                                 {format(
                                   new Date(job.created_at),
                                   "MMM d, yyyy"
@@ -192,7 +256,10 @@ export default function JobsPage() {
                               </div>
                               <div className="flex items-center gap-1">
                                 <Users className="h-4 w-4" />
-                                {job.applicants} applicants
+                                {job.applicants}{" "}
+                                {job.applicants === 1
+                                  ? "applicant"
+                                  : "applicants"}
                               </div>
                             </div>
 
@@ -253,7 +320,8 @@ export default function JobsPage() {
                                       Are you sure you want to delete "
                                       {job.title}"? This action cannot be undone
                                       and will remove all associated data
-                                      including applications.
+                                      including {job.applicants} application
+                                      {job.applicants !== 1 ? "s" : ""}.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -270,18 +338,32 @@ export default function JobsPage() {
                                 </AlertDialogContent>
                               </AlertDialog>
 
-                              <Link
-                                href={`/dashboard/employer/jobs/edit/${job.id}`}
-                              >
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  className="gap-2"
+                              <div className="flex gap-2">
+                                <Link
+                                  href={`/dashboard/employer/candidates?job_id=${job.id}`}
                                 >
-                                  <Edit className="h-4 w-4" />
-                                  Edit Job Details
-                                </Button>
-                              </Link>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                  >
+                                    <Users className="h-4 w-4" />
+                                    View Applicants ({job.applicants})
+                                  </Button>
+                                </Link>
+                                <Link
+                                  href={`/dashboard/employer/jobs/edit/${job.id}`}
+                                >
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="gap-2"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Edit Job
+                                  </Button>
+                                </Link>
+                              </div>
                             </div>
                           </div>
                         </DialogContent>
@@ -294,7 +376,7 @@ export default function JobsPage() {
                           className="gap-2 bg-transparent"
                         >
                           <Edit className="h-4 w-4" />
-                          Edit Job
+                          Edit
                         </Button>
                       </Link>
                     </div>
@@ -305,6 +387,26 @@ export default function JobsPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {job.description}
                   </p>
+
+                  {/* Tags in card preview */}
+                  {job.tags && job.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {job.tags.slice(0, 3).map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                      {job.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{job.tags.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
@@ -326,7 +428,8 @@ export default function JobsPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      {job.applicants} applicants
+                      {job.applicants}{" "}
+                      {job.applicants === 1 ? "applicant" : "applicants"}
                     </div>
                   </div>
                 </CardContent>
@@ -337,7 +440,15 @@ export default function JobsPage() {
         {/* Empty State */}
         {!loading && jobs.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No jobs posted yet</p>
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Briefcase className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              No jobs posted yet
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Create your first job posting to start attracting candidates
+            </p>
             <Link href="/dashboard/employer/jobs/new">
               <Button>Post Your First Job</Button>
             </Link>
