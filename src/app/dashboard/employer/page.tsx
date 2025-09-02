@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useAuth } from "@/context/auth-context";
@@ -11,6 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Upload Care
+import { FileUploaderRegular } from "@uploadcare/react-uploader/next";
+import "@uploadcare/react-uploader/core.css";
 
 // Icons
 import {
@@ -23,6 +28,8 @@ import {
   MapPin,
   Globe,
   Mail,
+  Camera,
+  Upload,
 } from "lucide-react";
 
 type CompanyData = {
@@ -33,6 +40,7 @@ type CompanyData = {
   website: string;
   email: string;
   about: string;
+  profileImage?: string;
 };
 
 export default function CompanyOverview() {
@@ -40,6 +48,8 @@ export default function CompanyOverview() {
   const [isEditing, setIsEditing] = useState(false);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [editData, setEditData] = useState<CompanyData | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const uploaderRef = useRef<any>(null);
 
   // Ambil data dari Firestore
   useEffect(() => {
@@ -60,6 +70,7 @@ export default function CompanyOverview() {
             website: data.website || "",
             email: data.contact_email || "",
             about: data.about_company || "",
+            profileImage: data.profile_image || "",
           });
         }
       } catch (error) {
@@ -69,6 +80,52 @@ export default function CompanyOverview() {
 
     fetchCompanyData();
   }, [user]);
+
+  // Handle image upload dan simpan ke Firestore
+  const handleImageUploadSuccess = async (fileInfo: any) => {
+    if (!user?.id || !fileInfo?.cdnUrl) return;
+
+    setIsUploadingImage(true);
+    try {
+      const docRef = doc(db, "jobposters", user.id);
+
+      // Update Firestore dengan URL gambar
+      await updateDoc(docRef, {
+        profile_image: fileInfo.cdnUrl,
+        updated_at: new Date().toISOString(),
+      });
+
+      // Update local state
+      setCompanyData((prev) =>
+        prev ? { ...prev, profileImage: fileInfo.cdnUrl } : prev
+      );
+
+      if (editData) {
+        setEditData((prev) =>
+          prev ? { ...prev, profileImage: fileInfo.cdnUrl } : prev
+        );
+      }
+
+      console.log("Profile image updated successfully:", fileInfo.cdnUrl);
+    } catch (error) {
+      console.error("Error updating profile image:", error);
+      alert("Failed to update profile image. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Handle file upload progress
+  const handleFileUploadStart = () => {
+    setIsUploadingImage(true);
+  };
+
+  // Handle upload error
+  const handleUploadError = (error: any) => {
+    console.error("Upload error:", error);
+    setIsUploadingImage(false);
+    alert("Failed to upload image. Please try again.");
+  };
 
   // Handle edit
   const handleEdit = () => {
@@ -96,12 +153,16 @@ export default function CompanyOverview() {
         website: editData.website,
         contact_email: editData.email,
         about_company: editData.about,
+        profile_image: editData.profileImage,
+        updated_at: new Date().toISOString(),
       });
 
       setCompanyData(editData);
       setIsEditing(false);
+      console.log("Company data updated successfully");
     } catch (error) {
       console.error("Error updating company data:", error);
+      alert("Failed to update company data. Please try again.");
     }
   };
 
@@ -164,8 +225,50 @@ export default function CompanyOverview() {
             )}
           </div>
         </div>
+
         <Card className="shadow-sm">
-          <CardContent className="">
+          <CardContent className="p-6">
+            {/* Profile Image Section */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative group">
+                <Avatar className="w-32 h-32 border-4 border-border">
+                  <AvatarImage
+                    src={companyData.profileImage}
+                    alt={companyData.companyName}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-blue-600 text-white text-4xl font-bold">
+                    {companyData.companyName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Upload Overlay - Only show when editing */}
+                {isEditing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Camera className="w-8 h-8 text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Button - Only show when editing */}
+              {isEditing && (
+                <div className="mt-4">
+                  <FileUploaderRegular
+                    sourceList="local, camera, facebook, gdrive"
+                    classNameUploader="uc-light"
+                    pubkey="c28f28a655efb84b86dd"
+                  />
+                </div>
+              )}
+
+              {/* Recommendation text - Only show when editing */}
+              {isEditing && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Recommended: Square image, at least 400x400px
+                </p>
+              )}
+            </div>
+
             {/* Company Header */}
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-8 mb-6 lg:mb-8">
               {/* Left Side - Company Basic Info */}

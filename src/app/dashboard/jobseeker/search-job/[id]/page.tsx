@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   doc,
@@ -51,6 +51,7 @@ export default async function JobDetailsPage({
     location?: string;
     website?: string;
     contact_email?: string;
+    profile_image?: string; // Added profile_image field
     personal_info?: {
       name: string;
       email: string;
@@ -128,6 +129,7 @@ export default async function JobDetailsPage({
   const companyWebsite = companyData?.website;
   const companyEmail = companyData?.contact_email;
   const companyAbout = companyData?.about_company || job.description;
+  const companyProfileImage = companyData?.profile_image; // Get profile image
 
   return (
     <div className="min-h-screen">
@@ -155,6 +157,11 @@ export default async function JobDetailsPage({
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
+                        <AvatarImage
+                          src={companyProfileImage}
+                          alt={`${companyName} logo`}
+                          className="object-cover"
+                        />
                         <AvatarFallback className="bg-blue-600 text-white text-xl font-bold">
                           {companyName.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -307,6 +314,11 @@ export default async function JobDetailsPage({
                 <CardContent>
                   <div className="flex items-start gap-3 mb-4">
                     <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={companyProfileImage}
+                        alt={`${companyName} logo`}
+                        className="object-cover"
+                      />
                       <AvatarFallback className="bg-blue-600 text-white font-bold">
                         {companyName.charAt(0).toUpperCase()}
                       </AvatarFallback>

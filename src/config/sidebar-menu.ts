@@ -13,16 +13,6 @@ import {
 
 export const secondaryMenu = [
   {
-    title: "Support",
-    url: "#",
-    icon: LifeBuoy,
-  },
-  {
-    title: "Feedback",
-    url: "#",
-    icon: Send,
-  },
-  {
     title: "Homepage",
     url: "/",
     icon: Home,
