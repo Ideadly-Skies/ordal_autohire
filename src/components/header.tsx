@@ -11,6 +11,7 @@ import { LogoutButton } from "./logout-button";
 const menuItems = [
   { name: "Ai Tools", href: "#link" },
   { name: "Pricing", href: "#link" },
+  { name: "About", href: "/about" },
 ];
 
 export const HeroHeader = () => {
