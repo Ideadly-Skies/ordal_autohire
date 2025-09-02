@@ -12,6 +12,7 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/config/firebase";
 import { ca } from "zod/v4/locales";
+import { boolean } from "zod";
 
 // ------------------ Types ------------------
 type AccountType = "jobseeker" | "employer";
@@ -26,6 +27,7 @@ export type User = {
   personal_info: { name: string; email: string };
   accountType: AccountType;
   background_info?: { yoe?: number };
+  upload_cv: boolean;
 };
 
 type AuthContextType = {

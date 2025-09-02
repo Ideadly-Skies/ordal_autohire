@@ -5,7 +5,7 @@ export const Logo = () => {
     <Image
       src="/logo/main-logo.webp"
       alt="Ordal AutoHire"
-      width={120}
+      width={100}
       height={40}
     />
   );

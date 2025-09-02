@@ -99,7 +99,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [accountType, setAccountType] = useState<
     "jobseeker" | "employer" | null
-  >(null);
+  >("jobseeker"); // Default to jobseeker instead of null
   const [currentStep, setCurrentStep] = useState(1);
 
   const form = useForm<FormData>({
@@ -110,7 +110,7 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
-      accountType: accountType || "jobseeker",
+      accountType: "jobseeker", // Default to jobseeker
     },
   });
 
@@ -245,8 +245,6 @@ export function RegisterForm() {
   }
 
   const getStepTitle = () => {
-    if (!accountType) return "Create an account";
-
     if (accountType === "jobseeker") {
       return "Create an account";
     }
@@ -261,8 +259,6 @@ export function RegisterForm() {
   };
 
   const getStepSubtitle = () => {
-    if (!accountType) return "Enter your details below to create your account";
-
     if (accountType === "jobseeker") {
       return "Enter your details below to create your account";
     }
@@ -274,6 +270,14 @@ export function RegisterForm() {
       4: "Tell us more about your company",
     };
     return employerSubtitles[currentStep as keyof typeof employerSubtitles];
+  };
+
+  // Check if current step is final step
+  const isFinalStep = () => {
+    if (accountType === "jobseeker") {
+      return true; // Jobseekers only have 1 step
+    }
+    return accountType === "employer" && currentStep === 4;
   };
 
   return (
@@ -547,8 +551,7 @@ export function RegisterForm() {
 
               {/* Buttons */}
               <div className="flex flex-col gap-2 mt-6">
-                {accountType === "jobseeker" ||
-                (accountType === "employer" && currentStep === 4) ? (
+                {isFinalStep() ? (
                   <>
                     <Button
                       type="submit"
@@ -557,7 +560,7 @@ export function RegisterForm() {
                     >
                       {isLoading ? "Creating Account..." : "Create Account"}
                     </Button>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" type="button">
                       Sign up with Google
                     </Button>
                   </>

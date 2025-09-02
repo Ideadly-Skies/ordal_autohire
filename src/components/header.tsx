@@ -90,7 +90,7 @@ export const HeroHeader = () => {
                 <div className="flex items-center gap-2">
                   <Button
                     asChild
-                    variant="default"
+                    variant="outline"
                     size="sm"
                     className={cn(isScrolled && "lg:hidden")}
                   >

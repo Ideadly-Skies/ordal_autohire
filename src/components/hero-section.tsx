@@ -94,7 +94,11 @@ export default function HeroSection() {
                 }}
                 className="mt-8 sm:mt-10 lg:mt-12 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-5"
               >
-                <UploadButton />
+                <Button>
+                  <Link href="/dashboard" className="flex items-center">
+                    Start now for free <ArrowRight />
+                  </Link>
+                </Button>
                 <AvatarGroup />
               </AnimatedGroup>
             </div>
