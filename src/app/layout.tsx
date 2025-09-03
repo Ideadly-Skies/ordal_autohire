@@ -6,7 +6,6 @@ import "@/styles/App.css";
 import "@/styles/index.css";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
-import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
 import PopUpPreview from "./PopUpPreview";
 import Script from "next/script";
@@ -37,30 +36,28 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <ThemeProvider>
-            {/* Dreamy Sky Pink Glow */}
-            {/* <div
-            className="absolute inset-0 z-0"
-            style={{
-              backgroundImage: `
-              radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 90%),
-              radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
-              }}
-              /> */}
-            {/* Your Content/Components */}
-            <Toaster />
-            {children}
-            {/* persistent floating chat widget */}
-            <PopUpPreview />
-            <Script
-              id="midtrans-snap"
-              src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL!}
-              data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-              strategy="afterInteractive"
-            />
+          {/* Dreamy Sky Pink Glow */}
+          {/* <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `
+            radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 90%),
+            radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
+            }}
+            /> */}
+          {/* Your Content/Components */}
+          <Toaster />
+          {children}
+          {/* persistent floating chat widget */}
+          <PopUpPreview />
+          <Script
+            id="midtrans-snap"
+            src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL!}
+            data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+            strategy="afterInteractive"
+          />
 
-            <AnimatedThemeToggler className="fixed z-3 bottom-6 left-6" />
-          </ThemeProvider>
+          <AnimatedThemeToggler className="fixed z-3 bottom-6 left-6" />
         </AuthProvider>
       </body>
     </html>

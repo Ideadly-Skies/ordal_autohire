@@ -37,20 +37,38 @@ export function ProfileTabs({ children }: ProfileTabsProps) {
           <CardContent className="p-6 space-y-6">
             <div className="space-y-6">
               <div className="border-b pb-6 last:border-b-0 last:pb-0">
-                <h3 className="font-medium text-lg mb-2">Software Engineer</h3>
-                <p className="text-sm text-muted-foreground mb-2">Google • Full-time</p>
-                <p className="text-sm text-muted-foreground">Jan 2020 - Present • 3 yrs 8 mos</p>
+                <h3 className="font-medium text-lg mb-2">Software Developer</h3>
+                <p className="text-sm text-muted-foreground mb-2">WerkDone • Full-time</p>
+                <p className="text-sm text-muted-foreground">April 2025 - Present • 6 months</p>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Building awesome web applications with modern technologies.
+                  Responsible for developing early-stage prototypes to test product ideas, applying strong
+                  problem-solving skills and technical judgement to quickly assess technical feasibility and provide
+                  direction for future development and/or in alignment with use needs.
+                  Research emerging technologies, APIs, and tools that could influence or improve potential
+                  solutions.
+                  Maintain current knowledge of relevant technology, programming skills and applications.
                 </p>
               </div>
               
-              <div className="pt-6">
-                <h3 className="font-medium text-lg mb-2">Frontend Developer</h3>
-                <p className="text-sm text-muted-foreground mb-2">Facebook • Full-time</p>
-                <p className="text-sm text-muted-foreground">Jun 2018 - Dec 2019 • 1 yr 7 mos</p>
+              <div className="border-b pb-6 last:border-b-0 last:pb-0">
+                <h3 className="font-medium text-lg mb-2">BackEnd Software Engineer</h3>
+                <p className="text-sm text-muted-foreground mb-2">JadiPintar • Full-time</p>
+                <p className="text-sm text-muted-foreground">March 2025 - July 2025 • 4 months</p>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Worked on user interface components and improved user experience.
+                    Handling back-end technologies and database structures such as MySQL, Prisma, Node.js , JSON,
+                    Python and more on a project basis.
+                    Provide support for other related development tasks such as frontend and jira task allocation. 
+                </p>
+              </div>
+
+              <div className="border-b pb-6 last:border-b-0 last:pb-06">
+                <h3 className="font-medium text-lg mb-2">Software Engineer Instructor</h3>
+                <p className="text-sm text-muted-foreground mb-2">Green Academy • Full-time</p>
+                <p className="text-sm text-muted-foreground">Feb 2025 - July 2025 • 5 months</p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  I teach a hybrid advanced Java full-stack web development class on selected days from 7-10 pm
+                  Utilized Java spring boot for backend applications and services; Angular and Vue for the frontend
+                  and supabase as the database provider for postgreSQL.
                 </p>
               </div>
             </div>

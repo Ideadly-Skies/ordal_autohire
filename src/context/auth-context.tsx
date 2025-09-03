@@ -22,6 +22,16 @@ type AuthResults = {
   message?: string;
 };
 
+type CompanyData = {
+  aboutCompany: string;
+  companyName: string;
+  contactEmail: string;
+  employeeCount: number;
+  industry: string;
+  location: string;
+  website?: string;
+};
+
 export type User = {
   id: string;
   personal_info: { name: string; email: string };
@@ -29,6 +39,11 @@ export type User = {
   plan: "free" | "pro";
   background_info?: { yoe?: number };
   upload_cv: boolean;
+  // Add these for payment integration compatibility
+  displayName?: string;
+  email?: string;
+  phone?: string;
+  companyData?: CompanyData; // Add this parameter
 };
 
 type AuthContextType = {
@@ -39,7 +54,7 @@ type AuthContextType = {
     email: string,
     password: string,
     accountType: AccountType,
-    companyData?: any // Add this parameter
+    companyData?: CompanyData // Add this parameter
   ) => Promise<AuthResults>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -99,37 +114,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     accountType: AccountType,
-    companyData?: any // Add this parameter for employer data
+    companyData?: CompanyData // Add this parameter for employer data
   ): Promise<AuthResults> => {
     setIsLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      let newUser: any = {
+      let newUser: User = {
         id: uid,
         personal_info: { name, email },
         accountType,
         plan: "free", // Default plan for all users
+        upload_cv: false, // Default value, will be overridden for employer
       };
 
       // If employer, add company data
       if (accountType === "employer" && companyData) {
         newUser = {
           ...newUser,
-          about_company: companyData.aboutCompany,
           accountType: "employer",
-          company_name: companyData.companyName,
-          contact_email: companyData.contactEmail,
-          employee_count: companyData.employeeCount,
-          industry: companyData.industry,
-          location: companyData.location,
-          personal_info: {
-            email: email,
-            name: name,
-          },
-          plan: "free", // Default plan
-          website: companyData.website || "",
+          companyData: companyData,
         };
       } else if (accountType === "jobseeker") {
         // Add jobseeker specific fields
@@ -147,21 +152,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await setDoc(doc(db, collectionName, uid), newUser);
       setUser(newUser);
       return { success: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       let message = "Something went wrong.";
-      switch (err.code) {
-        case "auth/email-already-in-use":
-          message = "This email is already registered.";
-          break;
-        case "auth/invalid-email":
-          message = "Invalid email format.";
-          break;
-        case "auth/weak-password":
-          message = "Password must be at least 6 characters.";
-          break;
-        case "auth/network-request-failed":
-          message = "Network error, please try again.";
-          break;
+      if (typeof err === "object" && err !== null && "code" in err) {
+        const code = (err as { code: string }).code;
+        switch (code) {
+          case "auth/email-already-in-use":
+            message = "This email is already registered.";
+            break;
+          case "auth/invalid-email":
+            message = "Invalid email format.";
+            break;
+          case "auth/weak-password":
+            message = "Password must be at least 6 characters.";
+            break;
+          case "auth/network-request-failed":
+            message = "Network error, please try again.";
+            break;
+        }
       }
 
       return { success: false, message }; // kirim balik ke form
@@ -205,21 +213,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Kalau nggak ada di keduanya
       return { success: false, message: "User data not found in database." };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
       let message = "Login failed. Please try again.";
 
-      switch (err.code) {
-        case "auth/user-not-found":
-        case "auth/wrong-password":
-          message = "Email or password is incorrect.";
-          break;
-        case "auth/invalid-email":
-          message = "Invalid email format.";
-          break;
-        case "auth/network-request-failed":
-          message = "Network error. Please check your connection.";
-          break;
+      if (typeof err === "object" && err !== null && "code" in err) {
+        const code = (err as { code: string }).code;
+        switch (code) {
+          case "auth/user-not-found":
+          case "auth/wrong-password":
+            message = "Email or password is incorrect.";
+            break;
+          case "auth/invalid-email":
+            message = "Invalid email format.";
+            break;
+          case "auth/network-request-failed":
+            message = "Network error. Please check your connection.";
+            break;
+        }
       }
 
       return { success: false, message };
