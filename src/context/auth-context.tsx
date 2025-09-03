@@ -26,6 +26,7 @@ export type User = {
   id: string;
   personal_info: { name: string; email: string };
   accountType: AccountType;
+  plan: "free" | "pro";
   background_info?: { yoe?: number };
   upload_cv: boolean;
 };
@@ -109,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: uid,
         personal_info: { name, email },
         accountType,
+        plan: "free", // Default plan for all users
       };
 
       // If employer, add company data
@@ -128,6 +130,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
           plan: "free", // Default plan
           website: companyData.website || "",
+        };
+      } else if (accountType === "jobseeker") {
+        // Add jobseeker specific fields
+        newUser = {
+          ...newUser,
+          background_info: { yoe: 0 },
+          upload_cv: false,
         };
       }
 

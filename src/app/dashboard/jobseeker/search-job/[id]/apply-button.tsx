@@ -90,6 +90,19 @@ export default function ApplyButton({ job }: ApplyButtonProps) {
           "Next.js",
           "Tailwind",
         ],
+        // Add job_snapshot to preserve job details at time of application
+        job_snapshot: {
+          company: job.company,
+          job_id: job.id,
+          location: job.location,
+          poster_id: job.poster_id || "",
+          salary_max: parseInt(job.salary_max),
+          salary_min: parseInt(job.salary_min),
+          source: "ordal",
+          status: job.status || "open",
+          tags: job.tags || ["React", "Next.js", "Tailwind", "REST"],
+          title: job.title,
+        },
       };
 
       // Create applicant data for job's subcollection using actual jobseeker data structure
@@ -119,6 +132,19 @@ export default function ApplyButton({ job }: ApplyButtonProps) {
         // Application specific data
         expected_salary_min: parseInt(job.salary_min) || 0,
         expected_salary_max: parseInt(job.salary_max) || 0,
+        // Add job_snapshot for employer's reference
+        job_snapshot: {
+          company: job.company,
+          job_id: job.id,
+          location: job.location,
+          poster_id: job.poster_id || "",
+          salary_max: parseInt(job.salary_max),
+          salary_min: parseInt(job.salary_min),
+          source: "ordal",
+          status: job.status || "open",
+          tags: job.tags || ["React", "Next.js", "Tailwind", "REST"],
+          title: job.title,
+        },
       };
 
       // Add application to jobseeker's subcollection: jobseekers/{userId}/jobs_applied

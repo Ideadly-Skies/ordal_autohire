@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search,
-  Download,
   Eye,
   ChevronDown,
   Calendar,
@@ -129,7 +128,9 @@ export default function CandidatesListPage() {
               name:
                 `${applicantData.first_name || ""} ${
                   applicantData.last_name || ""
-                }`.trim() || "Unknown",
+                }`.trim() ||
+                applicantData.name ||
+                "Unknown",
               email: applicantData.email || "",
               phone: applicantData.phone || "",
               position: jobData.title || "Unknown Position",
@@ -261,14 +262,6 @@ export default function CandidatesListPage() {
       console.error("Error updating status:", error);
       alert("Failed to update status. Please try again.");
     }
-  };
-
-  const handleDownloadCV = (candidateId: string, candidateName: string) => {
-    const link = document.createElement("a");
-    link.href = "/placeholder-cv.pdf";
-    link.download = `${candidateName.replace(" ", "_")}_CV.pdf`;
-    link.click();
-    console.log(`Downloading CV for ${candidateName}`);
   };
 
   const handleViewDetails = (candidateId: string, jobId: string) => {
@@ -417,18 +410,6 @@ export default function CandidatesListPage() {
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       View
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleDownloadCV(candidate.id, candidate.name)
-                      }
-                      className="text-muted-foreground border-border hover:bg-muted"
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      CV
                     </Button>
 
                     <DropdownMenu>
@@ -646,18 +627,6 @@ export default function CandidatesListPage() {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    handleDownloadCV(
-                      selectedCandidate.id,
-                      selectedCandidate.name
-                    )
-                  }
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download CV
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button>

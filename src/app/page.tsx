@@ -29,34 +29,32 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
               <div className="text-3xl lg:text-4xl font-bold text-primary">
-                1M+
+                500K+
               </div>
               <div className="text-sm text-muted-foreground">
-                Active Job Posts
+                Automatic Applications Sent
               </div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl lg:text-4xl font-bold text-primary">
-                50K+
+                25K+
               </div>
               <div className="text-sm text-muted-foreground">
-                Successful Placements
+                AI-Matched Job Placements
               </div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl lg:text-4xl font-bold text-primary">
-                95%
+                98%
               </div>
-              <div className="text-sm text-muted-foreground">
-                Interview Success Rate
-              </div>
+              <div className="text-sm text-muted-foreground">ATS Pass Rate</div>
             </div>
             <div className="space-y-2">
               <div className="text-3xl lg:text-4xl font-bold text-primary">
-                24h
+                5/day
               </div>
               <div className="text-sm text-muted-foreground">
-                Average Response Time
+                Auto-Apply Limit (Pro)
               </div>
             </div>
           </div>
@@ -68,11 +66,12 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground text-balance">
-              AI-Powered Job Search Tools
+              AI-Powered Automatic Job Applications
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Leverage cutting-edge technology to streamline your job search and
-              land your dream role faster.
+              Let our AI chatbot handle job applications for you. Automatic ATS
+              screening, keyword matching, and intelligent job filtering - all
+              powered by advanced AI technology.
             </p>
           </div>
 
@@ -83,11 +82,12 @@ export default function Home() {
                   <Target className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Smart Job Matching
+                  Automatic Job Applications
                 </h3>
                 <p className="text-muted-foreground">
-                  Our AI analyzes your skills and preferences to match you with
-                  the most relevant opportunities.
+                  Our AI chatbot automatically applies to jobs on your behalf,
+                  with intelligent filtering and up to 5 applications per day
+                  for Pro users.
                 </p>
               </CardContent>
             </Card>
@@ -98,11 +98,12 @@ export default function Home() {
                   <Zap className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Resume Optimization
+                  ATS Resume Screening
                 </h3>
                 <p className="text-muted-foreground">
-                  AI-powered resume analysis and optimization to increase your
-                  chances of getting noticed.
+                  Automatic ATS checker scans your resume for inconsistencies
+                  and errors, ensuring your applications pass employer screening
+                  systems.
                 </p>
               </CardContent>
             </Card>
@@ -113,11 +114,11 @@ export default function Home() {
                   <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Interview Preparation
+                  AI Chatbot Assistant
                 </h3>
                 <p className="text-muted-foreground">
-                  Practice with AI-generated interview questions tailored to
-                  your target roles and industry.
+                  Get instant answers and guidance throughout your job search
+                  journey with our intelligent AI chatbot assistant.
                 </p>
               </CardContent>
             </Card>
@@ -128,11 +129,12 @@ export default function Home() {
                   <Users className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Network Insights
+                  Smart Candidate Matching
                 </h3>
                 <p className="text-muted-foreground">
-                  Discover connections and referral opportunities within your
-                  professional network.
+                  Job posters get AI-computed match scores for all applicants,
+                  helping identify the best candidates based on skills and
+                  requirements.
                 </p>
               </CardContent>
             </Card>
@@ -143,11 +145,12 @@ export default function Home() {
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Application Tracking
+                  Keyword-Based Job Filtering
                 </h3>
                 <p className="text-muted-foreground">
-                  Keep track of all your applications with automated status
-                  updates and follow-up reminders.
+                  Advanced keyword matching filters jobs from our pool using
+                  credible API sources, ensuring relevant opportunities for your
+                  skills.
                 </p>
               </CardContent>
             </Card>
@@ -158,11 +161,12 @@ export default function Home() {
                   <Briefcase className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">
-                  Salary Intelligence
+                  Flexible Pricing Tiers
                 </h3>
                 <p className="text-muted-foreground">
-                  Get real-time salary data and negotiation insights for your
-                  target positions and locations.
+                  Choose between Free (manual applications) or Pro (automatic
+                  applications) for job seekers, with enhanced features for job
+                  posters.
                 </p>
               </CardContent>
             </Card>
@@ -178,8 +182,9 @@ export default function Home() {
               How It Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get started in minutes and let our AI do the heavy lifting for
-              your job search.
+              Get started in minutes and let our AI chatbot handle your job
+              applications automatically with intelligent screening and
+              matching.
             </p>
           </div>
 
@@ -189,12 +194,12 @@ export default function Home() {
                 <span className="text-2xl font-bold text-primary">1</span>
               </div>
               <h3 className="text-xl font-semibold text-foreground">
-                Create Your Profile
+                Upload & Screen Your Resume
               </h3>
               <p className="text-muted-foreground">
-                Upload your resume and tell us about your career goals, skills,
-                and preferences. Our AI will analyze your profile to understand
-                your unique strengths.
+                Upload your resume and our automatic ATS checker will scan for
+                inconsistencies and errors, ensuring it passes employer
+                screening systems.
               </p>
             </div>
 
@@ -203,12 +208,12 @@ export default function Home() {
                 <span className="text-2xl font-bold text-primary">2</span>
               </div>
               <h3 className="text-xl font-semibold text-foreground">
-                Get Matched
+                AI Filters & Matches Jobs
               </h3>
               <p className="text-muted-foreground">
-                Our intelligent matching system scans millions of job posts
-                daily and presents you with opportunities that align with your
-                profile and career aspirations.
+                Our AI filters jobs from credible sources using keyword matching
+                with your resume, presenting only the most relevant
+                opportunities.
               </p>
             </div>
 
@@ -217,12 +222,11 @@ export default function Home() {
                 <span className="text-2xl font-bold text-primary">3</span>
               </div>
               <h3 className="text-xl font-semibold text-foreground">
-                Land Interviews
+                Automatic Applications
               </h3>
               <p className="text-muted-foreground">
-                Apply with optimized applications, prepare with AI-powered
-                interview coaching, and track your progress until you land your
-                dream job.
+                Choose between manual applications (Free) or let our AI chatbot
+                automatically apply to up to 5 jobs per day (Pro).
               </p>
             </div>
           </div>
@@ -247,9 +251,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "I landed 3 interviews in my first week using Ordal AutoHire.
-                  The AI matching was incredibly accurate, and the interview
-                  prep helped me feel confident."
+                  "I landed 5 interviews in my first week using Ordal AutoHire's
+                  automatic application feature. The AI chatbot handled
+                  everything while I focused on interview preparation."
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -272,9 +276,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "The salary intelligence feature helped me negotiate a 40%
-                  increase. I wish I had found this platform sooner in my
-                  career."
+                  "The ATS checker found errors in my resume I never noticed.
+                  After fixing them, I started getting more callbacks. The Pro
+                  plan's automatic applications saved me hours every day."
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -297,9 +301,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "From application to offer in just 2 weeks! The resume
-                  optimization and application tracking made everything so much
-                  easier."
+                  "As a job poster, the Pro plan's candidate matching scores
+                  helped me identify the perfect candidate from 200+ applicants.
+                  The AI-computed match percentages were incredibly accurate."
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -311,7 +315,7 @@ export default function Home() {
                       Alex Liu
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Data Scientist at Netflix
+                      HR Director at TechCorp
                     </div>
                   </div>
                 </div>
@@ -337,68 +341,68 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                How does the AI matching work?
+                How does the automatic job application work?
               </h3>
               <p className="text-muted-foreground">
-                Our AI analyzes your skills, experience, preferences, and career
-                goals to match you with relevant opportunities. It learns from
-                your interactions and feedback to improve recommendations over
-                time.
+                Our AI chatbot analyzes your resume, screens it through our ATS
+                checker, and automatically applies to filtered jobs that match
+                your skills. Pro users can apply to up to 5 jobs per day.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                Is my data secure and private?
+                What's the difference between Free and Pro plans?
               </h3>
               <p className="text-muted-foreground">
-                Yes, we use enterprise-grade security measures to protect your
-                data. Your profile is only visible to you and potential
-                employers you choose to engage with.
+                Free users get access to most job listings but must apply
+                manually. Pro users get automatic applications, AI job
+                tailoring, and unlimited access to all features.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                Can I cancel my subscription anytime?
+                How does the ATS checker work?
               </h3>
               <p className="text-muted-foreground">
-                Absolutely. You can cancel your subscription at any time with no
-                cancellation fees. You'll continue to have access until the end
-                of your billing period.
+                Our automatic ATS checker scans your resume for inconsistencies,
+                formatting errors, and keyword optimization to ensure it passes
+                employer screening systems.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                Do you work with all industries?
+                How are job matches calculated?
               </h3>
               <p className="text-muted-foreground">
-                Yes, we have job opportunities across all major industries
-                including tech, finance, healthcare, marketing, sales, and more.
-                Our AI adapts to industry-specific requirements.
+                We use keyword matching between your resume and job
+                descriptions, combined with AI-computed skills analysis to
+                provide accurate match percentages for both job seekers and job
+                posters.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                How quickly can I expect to see results?
+                What features do job posters get?
               </h3>
               <p className="text-muted-foreground">
-                Most users see relevant job matches within 24 hours of
-                completing their profile. Interview opportunities typically come
-                within the first week for active users.
+                Job posters get a dashboard with posting forms and candidate
+                views. Free users see top 5 matches only, while Pro users see
+                all applicants sorted by AI-computed match scores.
               </p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                What makes you different from other job boards?
+                Is there a rate limit for automatic applications?
               </h3>
               <p className="text-muted-foreground">
-                Unlike traditional job boards, we use advanced AI to actively
-                match you with opportunities, optimize your applications, and
-                provide personalized career guidance throughout your journey.
+                Yes, automatic applications are limited to 5 roles per day to
+                ensure quality applications and prevent spam. The limit resets
+                every 24 hours.
               </p>
             </div>
           </div>
@@ -411,11 +415,12 @@ export default function Home() {
           <div className="bg-primary rounded-3xl p-8 lg:p-16 text-center">
             <div className="max-w-3xl mx-auto space-y-6">
               <h2 className="text-3xl lg:text-4xl font-bold text-primary-foreground text-balance">
-                Ready to Transform Your Job Search?
+                Ready to Automate Your Job Search?
               </h2>
               <p className="text-lg text-primary-foreground/80 leading-relaxed">
-                Join thousands of professionals who have accelerated their
-                careers with our AI-powered platform.
+                Join thousands of professionals who let our AI chatbot handle
+                their job applications automatically. Start with our free plan
+                or upgrade to Pro for unlimited automatic applications.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button
@@ -427,7 +432,7 @@ export default function Home() {
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
                 <span className="text-primary-foreground/60 text-sm">
-                  No credit card required
+                  ATS screening included • No credit card required
                 </span>
               </div>
             </div>

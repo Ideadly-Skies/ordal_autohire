@@ -3,13 +3,26 @@
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/kibo-ui/spinner";
@@ -20,20 +33,25 @@ import { db } from "@/config/firebase";
 
 type Application = {
   id: string;
-  company: string;
-  job_id: string;
-  location: string;
-  poster_id: string;
-  salary_max: number;
-  salary_min: number;
-  score: number;
-  source: string;
-  status: string;
   created_at: number;
+  job_id: string;
+  job_snapshot: {
+    company: string;
+    job_id: string;
+    location: string;
+    poster_id: string;
+    salary_max: number;
+    salary_min: number;
+    source: string;
+    status: string;
+    tags: string[];
+    title: string;
+  };
+  poster_id: string;
+  score: number;
+  status: string;
   updated_at: number;
-  title: string;
   user_id: string;
-  tags: string[];
 };
 
 const statusColors: Record<string, string> = {
@@ -120,18 +138,18 @@ export default function ApplicationsPage() {
   const formatDate = (ts: unknown) => {
     // Support Firestore Timestamp, millis number, or millis string
     const ms =
-      (ts &&
-        typeof ts === "object" &&
-        ts !== null &&
-        "toMillis" in ts &&
-        typeof (ts as { toMillis: unknown }).toMillis === "function"
+      ts &&
+      typeof ts === "object" &&
+      ts !== null &&
+      "toMillis" in ts &&
+      typeof (ts as { toMillis: unknown }).toMillis === "function"
         ? // Firestore Timestamp
           (ts as { toMillis: () => number }).toMillis()
         : typeof ts === "number"
         ? ts
         : typeof ts === "string"
         ? Number(ts)
-        : NaN);
+        : NaN;
 
     if (!Number.isFinite(ms)) return "—";
 
@@ -232,18 +250,23 @@ export default function ApplicationsPage() {
                       <TableRow key={app.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div className="font-semibold">{app.title}</div>
+                            <div className="font-semibold">
+                              {app.job_snapshot.title}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Building className="h-4 w-4 text-muted-foreground" />
-                            {app.company}
+                            {app.job_snapshot.company}
                           </div>
                         </TableCell>
-                        <TableCell>{app.location}</TableCell>
+                        <TableCell>{app.job_snapshot.location}</TableCell>
                         <TableCell className="text-sm">
-                          {formatSalary(app.salary_min, app.salary_max)}
+                          {formatSalary(
+                            app.job_snapshot.salary_min,
+                            app.job_snapshot.salary_max
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">

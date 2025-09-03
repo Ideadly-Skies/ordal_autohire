@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import "@/styles/App.css"
-import "@/styles/index.css"
+import "@/styles/App.css";
+import "@/styles/index.css";
 
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -59,7 +59,7 @@ export default function RootLayout({
               strategy="afterInteractive"
             />
 
-            <AnimatedThemeToggler className="fixed bottom-6 right-6" />
+            <AnimatedThemeToggler className="fixed z-3 bottom-6 left-6" />
           </ThemeProvider>
         </AuthProvider>
       </body>

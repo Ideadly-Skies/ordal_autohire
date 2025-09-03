@@ -9,6 +9,16 @@ import { fetchJobseeker } from "@/lib/profile";
 import { Jobseeker } from "@/lib/jobseeker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
+import { db } from "@/config/firebase";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import { getJobseekerStats } from "@/lib/stats";
 
 function computeProfileStrength(js?: Jobseeker): number {
   if (!js) return 0;
@@ -20,13 +30,26 @@ function computeProfileStrength(js?: Jobseeker): number {
   return score;
 }
 
+interface QuickStats {
+  applicationsSent: number;
+  interviewInvites: number;
+  responseRate: string;
+}
+
 export default function ProfileSidebar() {
   const { user, isLoading } = useAuth();
 
   const DEFAULT_USER_ID = user?.id || "";
   const [data, setData] = useState<Jobseeker | null>(null);
   const [loading, setLoading] = useState(isLoading);
+  const [stats, setStats] = useState<QuickStats>({
+    applicationsSent: 0,
+    interviewInvites: 0,
+    responseRate: "0%",
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
 
+  // Fetch user profile data
   useEffect(() => {
     let on = true;
     fetchJobseeker(DEFAULT_USER_ID).then((d) => {
@@ -39,6 +62,29 @@ export default function ProfileSidebar() {
       on = false;
     };
   }, []);
+
+  // Fetch quick stats from Firestore
+  useEffect(() => {
+    const fetchQuickStats = async () => {
+      if (!DEFAULT_USER_ID) {
+        setStatsLoading(false);
+        return;
+      }
+
+      try {
+        const fetchedStats = await getJobseekerStats(DEFAULT_USER_ID);
+        setStats(fetchedStats);
+      } catch (error) {
+        console.error("Error fetching quick stats:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    if (DEFAULT_USER_ID) {
+      fetchQuickStats();
+    }
+  }, [DEFAULT_USER_ID]);
 
   const strength = useMemo(
     () => computeProfileStrength(data ?? undefined),
@@ -168,7 +214,7 @@ export default function ProfileSidebar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 lg:space-y-3">
-          {loading ? (
+          {statsLoading ? (
             <>
               <div className="flex justify-between items-center">
                 <Skeleton className="h-4 w-28" />
@@ -176,10 +222,6 @@ export default function ProfileSidebar() {
               </div>
               <div className="flex justify-between items-center">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-8" />
-              </div>
-              <div className="flex justify-between items-center">
-                <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-4 w-8" />
               </div>
               <div className="flex justify-between items-center">
@@ -193,28 +235,22 @@ export default function ProfileSidebar() {
                 <span className="text-sm text-muted-foreground">
                   Applications Sent
                 </span>
-                <span className="font-semibold">{loading ? "…" : 47}</span>
+                <span className="font-semibold">{stats.applicationsSent}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">
                   Interview Invites
                 </span>
                 <span className="font-semibold text-green-600">
-                  {loading ? "…" : 12}
+                  {stats.interviewInvites}
                 </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Profile Views
-                </span>
-                <span className="font-semibold">{loading ? "…" : 156}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">
                   Response Rate
                 </span>
                 <span className="font-semibold text-blue-600">
-                  {loading ? "…" : "25.5%"}
+                  {stats.responseRate}
                 </span>
               </div>
             </>

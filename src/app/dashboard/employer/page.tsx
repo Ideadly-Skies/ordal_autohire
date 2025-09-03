@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { useAuth } from "@/context/auth-context";
@@ -13,9 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Upload Care
-import { FileUploaderRegular } from "@uploadcare/react-uploader/next";
-import "@uploadcare/react-uploader/core.css";
+// Toast
+import { toast } from "react-hot-toast";
 
 // Icons
 import {
@@ -49,7 +48,6 @@ export default function CompanyOverview() {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [editData, setEditData] = useState<CompanyData | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const uploaderRef = useRef<any>(null);
 
   // Ambil data dari Firestore
   useEffect(() => {
@@ -81,50 +79,81 @@ export default function CompanyOverview() {
     fetchCompanyData();
   }, [user]);
 
-  // Handle image upload dan simpan ke Firestore
-  const handleImageUploadSuccess = async (fileInfo: any) => {
-    if (!user?.id || !fileInfo?.cdnUrl) return;
+  // Add timeout for upload loading state
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isUploadingImage) {
+      timeout = setTimeout(() => {
+        setIsUploadingImage(false);
+        toast.error("Upload timeout. Please try again.");
+      }, 30000); // 30 seconds timeout
+    }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isUploadingImage]);
 
-    setIsUploadingImage(true);
+  const processImageUpload = async (cdnUrl: string) => {
     try {
-      const docRef = doc(db, "jobposters", user.id);
+      const docRef = doc(db, "jobposters", user!.id);
 
       // Update Firestore dengan URL gambar
       await updateDoc(docRef, {
-        profile_image: fileInfo.cdnUrl,
+        profile_image: cdnUrl,
         updated_at: new Date().toISOString(),
       });
 
       // Update local state
       setCompanyData((prev) =>
-        prev ? { ...prev, profileImage: fileInfo.cdnUrl } : prev
+        prev ? { ...prev, profileImage: cdnUrl } : prev
       );
 
       if (editData) {
         setEditData((prev) =>
-          prev ? { ...prev, profileImage: fileInfo.cdnUrl } : prev
+          prev ? { ...prev, profileImage: cdnUrl } : prev
         );
       }
 
-      console.log("Profile image updated successfully:", fileInfo.cdnUrl);
+      toast.success("Profile image updated successfully!");
+      console.log("Profile image updated successfully:", cdnUrl);
     } catch (error) {
       console.error("Error updating profile image:", error);
-      alert("Failed to update profile image. Please try again.");
+      toast.error("Failed to update profile image. Please try again.");
     } finally {
       setIsUploadingImage(false);
     }
   };
 
-  // Handle file upload progress
-  const handleFileUploadStart = () => {
-    setIsUploadingImage(true);
-  };
+  // Alternative manual file upload handler
+  const handleFileInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
 
-  // Handle upload error
-  const handleUploadError = (error: any) => {
-    console.error("Upload error:", error);
-    setIsUploadingImage(false);
-    alert("Failed to upload image. Please try again.");
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("UPLOADCARE_PUB_KEY", "c28f28a655efb84b86dd");
+      formData.append("file", file);
+
+      const response = await fetch("https://upload.uploadcare.com/base/", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.file) {
+        const cdnUrl = `https://ucarecdn.com/${result.file}/`;
+        await processImageUpload(cdnUrl);
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      console.error("Manual upload error:", error);
+      toast.error("Failed to upload image. Please try again.");
+      setIsUploadingImage(false);
+    }
   };
 
   // Handle edit
@@ -159,10 +188,11 @@ export default function CompanyOverview() {
 
       setCompanyData(editData);
       setIsEditing(false);
+      toast.success("Company data updated successfully!");
       console.log("Company data updated successfully");
     } catch (error) {
       console.error("Error updating company data:", error);
-      alert("Failed to update company data. Please try again.");
+      toast.error("Failed to update company data. Please try again.");
     }
   };
 
@@ -249,18 +279,36 @@ export default function CompanyOverview() {
                   </div>
                 )}
               </div>
-
               {/* Upload Button - Only show when editing */}
               {isEditing && (
                 <div className="mt-4">
-                  <FileUploaderRegular
-                    sourceList="local, camera, facebook, gdrive"
-                    classNameUploader="uc-light"
-                    pubkey="c28f28a655efb84b86dd"
-                  />
+                  {isUploadingImage ? (
+                    <div className="flex items-center justify-center gap-2 py-4">
+                      <Spinner />
+                      <span className="text-sm text-muted-foreground">
+                        Uploading image...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileInputChange}
+                        className="hidden"
+                        id="manual-upload"
+                      />
+                      <label
+                        htmlFor="manual-upload"
+                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground border border-dashed border-muted rounded-md cursor-pointer hover:bg-muted/50 transition-colors"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Click to upload image
+                      </label>
+                    </div>
+                  )}
                 </div>
-              )}
-
+              )}{" "}
               {/* Recommendation text - Only show when editing */}
               {isEditing && (
                 <p className="text-xs text-muted-foreground mt-2 text-center">

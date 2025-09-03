@@ -36,7 +36,7 @@ export default function ProfileContent() {
       doc(db, "jobseekers", uid),
       (snap) => {
         setData((snap.data() as Jobseeker) ?? null);
-        console.log(`snap data from profile content: ${snap.data()}`)
+        console.log(`snap data from profile content: ${snap.data()}`);
         setLoading(false);
       },
       (err) => {
@@ -89,7 +89,6 @@ export default function ProfileContent() {
             )}
           </CardContent>
         </Card>
-
         {/* Skills */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
@@ -124,7 +123,6 @@ export default function ProfileContent() {
             )}
           </CardContent>
         </Card>
-
         {/* Interests */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
@@ -158,8 +156,7 @@ export default function ProfileContent() {
             )}
           </CardContent>
         </Card>
-
-        {/* Recent Activity */}
+        {/* Recent Activity
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">
@@ -178,7 +175,7 @@ export default function ProfileContent() {
               </p>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

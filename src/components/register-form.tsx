@@ -552,18 +552,9 @@ export function RegisterForm() {
               {/* Buttons */}
               <div className="flex flex-col gap-2 mt-6">
                 {isFinalStep() ? (
-                  <>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Creating Account..." : "Create Account"}
-                    </Button>
-                    <Button variant="outline" className="w-full" type="button">
-                      Sign up with Google
-                    </Button>
-                  </>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
                 ) : (
                   <Button
                     type="button"

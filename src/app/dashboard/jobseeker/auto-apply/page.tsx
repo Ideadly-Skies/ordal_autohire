@@ -1,7 +1,12 @@
-'use client'
+"use client";
 import { useCallback, useState } from "react";
+import { SubscribeProButton } from "@/components/subscribe-pro-button";
 import {
-  Card, CardContent, CardFooter, CardHeader, CardTitle,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 
 // Extend the Window interface to include 'snap' with the 'pay' method
@@ -26,8 +31,8 @@ import { Check } from "lucide-react";
 
 type Plan = {
   name: "Free" | "Pro";
-  price: string;          // display only
-  amountIdr?: number;     // <-- numeric price for Midtrans (IDR). Only for paid plans.
+  price: string; // display only
+  amountIdr?: number; // <-- numeric price for Midtrans (IDR). Only for paid plans.
   cta: string;
   features: string[];
   highlight: "popular" | "recommended";
@@ -102,9 +107,13 @@ function PlanCard({
       </Badge>
 
       <CardHeader className="pt-8">
-        <CardTitle className="text-2xl font-semibold text-center">{plan.name}</CardTitle>
+        <CardTitle className="text-2xl font-semibold text-center">
+          {plan.name}
+        </CardTitle>
         <div className="text-5xl font-bold text-center mt-2">{plan.price}</div>
-        <p className="text-center text-xs text-muted-foreground mt-1">per month</p>
+        <p className="text-center text-xs text-muted-foreground mt-1">
+          per month
+        </p>
       </CardHeader>
 
       <CardContent className="flex-1">
@@ -115,7 +124,9 @@ function PlanCard({
             return (
               <li key={i} className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4" aria-hidden />
-                <span className={negative ? "text-red-500" : undefined}>{text}</span>
+                <span className={negative ? "text-red-500" : undefined}>
+                  {text}
+                </span>
               </li>
             );
           })}
@@ -173,7 +184,12 @@ export default function Page() {
             phone: "08123456789",
           },
           items: [
-            { id: "pro-subscription", price: plan.amountIdr, quantity: 1, name: "Pro Plan (Monthly)" },
+            {
+              id: "pro-subscription",
+              price: plan.amountIdr,
+              quantity: 1,
+              name: "Pro Plan (Monthly)",
+            },
           ],
         }),
       });
@@ -215,7 +231,8 @@ export default function Page() {
             Try Auto Apply
           </h1>
           <p className="text-muted-foreground max-w-prose">
-            Our system matches your skills with openings and submits applications instantly.
+            Our system matches your skills with openings and submits
+            applications instantly.
           </p>
           <Button size="lg" className="px-8" onClick={() => checkout(plans[0])}>
             Get Started
@@ -223,19 +240,30 @@ export default function Page() {
         </section>
 
         {/* RIGHT */}
-        <section>
+        <section className="space-y-6">
+          {/* Pro Subscription Button */}
+          <SubscribeProButton />
+
           <Card className="border-muted-foreground/20 bg-muted p-6 shadow-sm max-w-3xl w-full">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl text-center">Choose Your Plan</CardTitle>
+              <CardTitle className="text-2xl text-center">
+                Choose Your Plan
+              </CardTitle>
               <p className="text-md text-muted-foreground text-center">
-                Start free with manual applications, or upgrade for AI-powered auto apply.
+                Start free with manual applications, or upgrade for AI-powered
+                auto apply.
               </p>
             </CardHeader>
 
             <CardContent>
               <div className="grid gap-6 sm:grid-cols-2 grid-cols-1">
                 {plans.map((plan) => (
-                  <PlanCard key={plan.name} plan={plan} onCheckout={checkout} loadingFor={loadingFor} />
+                  <PlanCard
+                    key={plan.name}
+                    plan={plan}
+                    onCheckout={checkout}
+                    loadingFor={loadingFor}
+                  />
                 ))}
               </div>
             </CardContent>
