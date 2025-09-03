@@ -48,8 +48,8 @@ export default function ProfileContent() {
     return data.resume_summary || data.background_info?.summary || "";
   }, [data]);
 
-  const skills = data?.skills || [];
-  const interests = data?.background_info?.interests || [];
+  const skills = Array.isArray(data?.skills) ? data.skills : [];
+  const interests = Array.isArray(data?.background_info?.interests) ? data.background_info.interests : [];
   const name = `${data?.personal_info?.first_name || ""} ${data?.personal_info?.last_name || ""}`.trim();
   const title = data?.background_info?.title || "Job Title";
   const location = data?.personal_info?.location || "Location not specified";
@@ -141,13 +141,13 @@ export default function ProfileContent() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium">
-                  {data?.education?.[0]?.institution || "University Name"}
+                  {data?.education && Array.isArray(data.education) && data.education[0]?.institution ? data.education[0].institution : "University Name"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {data?.education?.[0]?.degree || "Bachelor's Degree"}, {data?.education?.[0]?.field_of_study || "Computer Science"}
+                  {data?.education && Array.isArray(data.education) && data.education[0]?.degree ? data.education[0].degree : "Bachelor's Degree"}, {data?.education && Array.isArray(data.education) && data.education[0]?.field_of_study ? data.education[0].field_of_study : "Computer Science"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {data?.education?.[0]?.start_year || "2018"} - {data?.education?.[0]?.end_year || "2022"}
+                  {data?.education && Array.isArray(data.education) && data.education[0]?.start_year ? data.education[0].start_year : "2018"} - {data?.education && Array.isArray(data.education) && data.education[0]?.end_year ? data.education[0].end_year : "2022"}
                 </p>
               </div>
             </div>
