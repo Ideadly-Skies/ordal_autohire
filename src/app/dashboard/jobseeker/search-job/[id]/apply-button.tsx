@@ -65,7 +65,23 @@ export default function ApplyButton({ job }: ApplyButtonProps) {
       const jobseekerRef = doc(db, "jobseekers", user.id);
       const jobseekerSnap = await getDoc(jobseekerRef);
 
-      let jobseekerData: any = {};
+      type Jobseeker = {
+        id?: string;
+        name?: string;
+        personal_info?: {
+          first_name?: string;
+          last_name?: string;
+          email?: string;
+          phone?: string;
+        };
+        background_info?: {
+          summary?: string;
+          interests?: string[];
+        };
+        resume_summary?: string;
+        accountType?: string;
+      };
+      let jobseekerData: Jobseeker = {};
       if (jobseekerSnap.exists()) {
         jobseekerData = jobseekerSnap.data();
       }

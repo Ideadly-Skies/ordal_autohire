@@ -317,8 +317,8 @@ export default function JobsPage() {
                                       Delete Job Posting
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to delete "
-                                      {job.title}"? This action cannot be undone
+                                      Are you sure you want to delete &quot;
+                                      {job.title}&quot;? This action cannot be undone
                                       and will remove all associated data
                                       including {job.applicants} application
                                       {job.applicants !== 1 ? "s" : ""}.

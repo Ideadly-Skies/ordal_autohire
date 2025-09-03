@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
-import { useAuth } from "@/context/auth-context"; // 👈 add
+import { useAuth } from "@/context/auth-context";
 import {
   Card, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -8,23 +8,6 @@ import { SubscribeProCTAButton } from "@/components/subscribe-pro-cta-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, Crown } from "lucide-react";
-
-// Midtrans snap typing stays the same…
-declare global {
-  interface Window {
-    snap?: {
-      pay: (
-        token: string,
-        handlers?: {
-          onSuccess?: (result: unknown) => void;
-          onPending?: (result: unknown) => void;
-          onError?: (error: unknown) => void;
-          onClose?: () => void;
-        }
-      ) => void;
-    };
-  }
-}
 
 type Plan = {
   name: "Free" | "Pro";
@@ -149,7 +132,7 @@ function PlanCard({
 }
 
 export default function Page() {
-  const { user } = useAuth(); // 👈 read plan from auth
+  const { user } = useAuth();
   const [loadingFor, setLoadingFor] = useState<string | null>(null);
 
   const checkout = useCallback(async (plan: Plan) => {

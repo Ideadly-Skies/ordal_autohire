@@ -9,7 +9,30 @@ import { Button } from "../ui/button";
 
 const PAGE_LIMIT = 12;
 
-export function JobSearchToolbar({ jobs }: { jobs: any[] }) {
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location?: string;
+  description?: string;
+  tags?: string[];
+  work_mode?: string;
+  type?: string;
+  salary_min?: number;
+  salary_max?: number;
+  salary_currency?: string;
+  company_logo?: string;
+  poster_name?: string;
+  experience?: string;
+  created_at?: string;
+  applicants?: number;
+  requirements?: string[];
+  offers?: unknown; // Replace 'unknown' with a specific type if the structure is known
+  status?: string;
+  // Add other fields as needed
+}
+
+export function JobSearchToolbar({ jobs }: { jobs: Job[] }) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
@@ -74,7 +97,25 @@ export function JobSearchToolbar({ jobs }: { jobs: any[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
         {paginated.map((job) => (
-          <JobCard key={job.id} job={job} />
+         <JobCard
+            key={job.id}
+            job={{
+              ...job,
+              location: job.location ?? "",
+              description: job.description ?? "",
+              work_mode: job.work_mode ?? "",
+              type: job.type ?? "",
+              tags: job.tags ?? [],
+              salary_min: job.salary_min !== undefined ? String(job.salary_min) : "",
+              salary_max: job.salary_max !== undefined ? String(job.salary_max) : "",
+              experience: job.experience ?? "",
+              created_at: job.created_at ?? "",
+              applicants: job.applicants ?? 0,
+              requirements: job.requirements ?? [], // Ensure always string[]
+              offers: Array.isArray(job.offers) ? job.offers : [], // Ensure always string[]
+              status: job.status === "open" || job.status === "closed" ? job.status : "open", // Ensure valid status
+            }}
+          />
         ))}
         {paginated.length === 0 && (
           <div className="col-span-full text-center text-sm text-muted-foreground py-12">
@@ -82,6 +123,7 @@ export function JobSearchToolbar({ jobs }: { jobs: any[] }) {
           </div>
         )}
       </div>
+
 
       <Pagination
         currentPage={page}

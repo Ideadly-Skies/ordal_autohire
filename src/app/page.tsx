@@ -251,9 +251,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "I landed 5 interviews in my first week using Ordal AutoHire's
+                  &quot;I landed 5 interviews in my first week using Ordal AutoHire&apos;s
                   automatic application feature. The AI chatbot handled
-                  everything while I focused on interview preparation."
+                  everything while I focused on interview preparation.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -276,9 +276,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "The ATS checker found errors in my resume I never noticed.
+                  &quot;The ATS checker found errors in my resume I never noticed.
                   After fixing them, I started getting more callbacks. The Pro
-                  plan's automatic applications saved me hours every day."
+                  plan&apos;s automatic applications saved me hours every day.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -301,9 +301,9 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  "As a job poster, the Pro plan's candidate matching scores
+                  &quot;As a job poster, the Pro plan&apos;s candidate matching scores
                   helped me identify the perfect candidate from 200+ applicants.
-                  The AI-computed match percentages were incredibly accurate."
+                  The AI-computed match percentages were incredibly accurate.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -352,7 +352,7 @@ export default function Home() {
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">
-                What's the difference between Free and Pro plans?
+                What&apos;s the difference between Free and Pro plans?
               </h3>
               <p className="text-muted-foreground">
                 Free users get access to most job listings but must apply

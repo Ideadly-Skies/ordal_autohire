@@ -138,7 +138,7 @@ export function RegisterForm() {
       }
     }
 
-    return await form.trigger(fieldsToValidate as any);
+    return await form.trigger(fieldsToValidate as Parameters<typeof form.trigger>[0]);
   };
 
   const nextStep = async () => {
@@ -202,7 +202,7 @@ export function RegisterForm() {
           {
             companyName: (values as EmployerData).companyName,
             industry: (values as EmployerData).industry,
-            employeeCount: (values as EmployerData).employeeCount,
+            employeeCount: Number((values as EmployerData).employeeCount),
             location: (values as EmployerData).location,
             website: (values as EmployerData).website,
             contactEmail: (values as EmployerData).contactEmail,

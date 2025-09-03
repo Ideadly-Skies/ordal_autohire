@@ -104,7 +104,7 @@ export default async function JobDetailsPage({
         <div className="text-center">
           <h1 className="text-2xl font-bold">Job Not Found</h1>
           <p className="text-muted-foreground mt-2">
-            The job you're looking for doesn't exist.
+            The job you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link href="/dashboard/jobseeker/search-job">
             <Button className="mt-4">Back to Jobs</Button>
