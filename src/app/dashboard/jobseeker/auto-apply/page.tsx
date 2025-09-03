@@ -1,21 +1,21 @@
 "use client";
 import { useCallback, useState } from "react";
-import { SubscribeProButton } from "@/components/subscribe-pro-button";
+import { useAuth } from "@/context/auth-context"; // 👈 add
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
+import { SubscribeProCTAButton } from "@/components/subscribe-pro-cta-button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Check, Crown } from "lucide-react";
 
-// Extend the Window interface to include 'snap' with the 'pay' method
+// Midtrans snap typing stays the same…
 declare global {
   interface Window {
     snap?: {
       pay: (
         token: string,
-        options: {
+        handlers?: {
           onSuccess?: (result: unknown) => void;
           onPending?: (result: unknown) => void;
           onError?: (error: unknown) => void;
@@ -25,14 +25,11 @@ declare global {
     };
   }
 }
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
 
 type Plan = {
   name: "Free" | "Pro";
-  price: string; // display only
-  amountIdr?: number; // <-- numeric price for Midtrans (IDR). Only for paid plans.
+  price: string;
+  amountIdr?: number;
   cta: string;
   features: string[];
   highlight: "popular" | "recommended";
@@ -56,7 +53,7 @@ const plans: Plan[] = [
   {
     name: "Pro",
     price: "$119",
-    amountIdr: 1790000, // <-- set the real IDR price you want to charge
+    amountIdr: 1_790_000,
     cta: "Upgrade to Pro",
     highlight: "recommended",
     features: [
@@ -111,9 +108,7 @@ function PlanCard({
           {plan.name}
         </CardTitle>
         <div className="text-5xl font-bold text-center mt-2">{plan.price}</div>
-        <p className="text-center text-xs text-muted-foreground mt-1">
-          per month
-        </p>
+        <p className="text-center text-xs text-muted-foreground mt-1">per month</p>
       </CardHeader>
 
       <CardContent className="flex-1">
@@ -124,9 +119,7 @@ function PlanCard({
             return (
               <li key={i} className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4" aria-hidden />
-                <span className={negative ? "text-red-500" : undefined}>
-                  {text}
-                </span>
+                <span className={negative ? "text-red-500" : undefined}>{text}</span>
               </li>
             );
           })}
@@ -134,44 +127,47 @@ function PlanCard({
       </CardContent>
 
       <CardFooter className="mt-auto">
-        <Button
-          className={`w-full ${buttonStyle}`}
-          disabled={disabled}
-          onClick={() => onCheckout(plan)}
-        >
-          {disabled ? "Processing..." : plan.cta}
-        </Button>
+        {plan.name === "Pro" ? (
+          <SubscribeProCTAButton
+            amountIdr={plan.amountIdr!}
+            className={`w-full ${buttonStyle}`}
+          >
+            {plan.cta}
+          </SubscribeProCTAButton>
+        ) : (
+          <Button
+            className={`w-full ${buttonStyle}`}
+            disabled={disabled}
+            onClick={() => onCheckout(plan)}
+          >
+            {disabled ? "Processing..." : plan.cta}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
 }
 
 export default function Page() {
+  const { user } = useAuth(); // 👈 read plan from auth
   const [loadingFor, setLoadingFor] = useState<string | null>(null);
 
   const checkout = useCallback(async (plan: Plan) => {
     try {
-      // Free plan → no payment. Put your own flow here (e.g., enable features, route to dashboard)
       if (plan.name === "Free") {
-        // e.g., router.push("/onboarding")
         console.log("Activated Free plan");
         return;
       }
-
-      // Safety: ensure Snap is loaded
       if (!window.snap) {
         alert("Payment module not ready. Please refresh the page.");
         return;
       }
-
       if (!plan.amountIdr) {
         alert("Missing price for this plan.");
         return;
       }
-
       setLoadingFor(plan.name);
 
-      // 1) ask the server for a Midtrans Snap token
       const res = await fetch("/api/midtrans/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -179,9 +175,9 @@ export default function Page() {
           orderId: `PRO-${Date.now()}`,
           amount: plan.amountIdr,
           customer: {
-            first_name: "Obie", // Optional: hydrate from your user profile
-            email: "obie@example.com",
-            phone: "08123456789",
+            first_name: user?.displayName || "User",
+            email: user?.email,
+            phone: user?.phone || "",
           },
           items: [
             {
@@ -197,22 +193,17 @@ export default function Page() {
       const { token } = await res.json();
       if (!token) throw new Error("No token from server");
 
-      // 2) open Snap popup
-      window.snap.pay(token, {
-        onSuccess: async (result: unknown) => {
+      window.snap!.pay(token, {
+        onSuccess: async (result) => {
           console.log("✅ Success", result);
-          // TODO: mark user as Pro in your DB
+          // upgrade handled by your Snap success flow/hook if you wired it
         },
-        onPending: (result: unknown) => {
-          console.log("⏳ Pending", result);
-        },
-        onError: (error: unknown) => {
-          console.error("❌ Error", error);
+        onPending: (r) => console.log("⏳ Pending", r),
+        onError: (e) => {
+          console.error("❌ Error", e);
           alert("Payment failed. Please try again.");
         },
-        onClose: () => {
-          console.warn("Popup closed by user");
-        },
+        onClose: () => console.warn("Popup closed by user"),
       });
     } catch (e) {
       console.error(e);
@@ -220,8 +211,31 @@ export default function Page() {
     } finally {
       setLoadingFor(null);
     }
-  }, []);
+  }, [user]);
 
+  // ✅ If already Pro, show the simple message instead of pricing cards
+  if (user?.plan === "pro") {
+    return (
+      <main className="mx-auto max-w-3xl h-full px-4 py-16">
+        <Card className="border-2 border-yellow-500/70 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <CardHeader className="text-center">
+            <Crown className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
+            <CardTitle className="text-2xl">Congrats — you’re a Pro user!</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center text-muted-foreground">
+            Start using the Ordal chatbot now to auto-apply and get premium features.
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button asChild size="lg" className="bg-yellow-600 hover:bg-yellow-700">
+              Open Ordal Chatbot
+            </Button>
+          </CardFooter>
+        </Card>
+      </main>
+    );
+  }
+
+  // Default (not Pro): show landing + pricing
   return (
     <main className="mx-auto max-w-6xl h-full px-4 py-16">
       <div className="grid items-center gap-12 md:grid-cols-2">
@@ -231,8 +245,7 @@ export default function Page() {
             Try Auto Apply
           </h1>
           <p className="text-muted-foreground max-w-prose">
-            Our system matches your skills with openings and submits
-            applications instantly.
+            Our system matches your skills with openings and submits applications instantly.
           </p>
           <Button size="lg" className="px-8" onClick={() => checkout(plans[0])}>
             Get Started
@@ -241,17 +254,11 @@ export default function Page() {
 
         {/* RIGHT */}
         <section className="space-y-6">
-          {/* Pro Subscription Button */}
-          <SubscribeProButton />
-
           <Card className="border-muted-foreground/20 bg-muted p-6 shadow-sm max-w-3xl w-full">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl text-center">
-                Choose Your Plan
-              </CardTitle>
+              <CardTitle className="text-2xl text-center">Choose Your Plan</CardTitle>
               <p className="text-md text-muted-foreground text-center">
-                Start free with manual applications, or upgrade for AI-powered
-                auto apply.
+                Start free with manual applications, or upgrade for AI-powered auto apply.
               </p>
             </CardHeader>
 
