@@ -27,11 +27,11 @@ const benefits = [
     },
 ]
 const members = [
-    { src: "/saki.png", name: "Saki", role: "leader" },
-    { src: "/kotone.png", name: "Kotone", role: "member" },
-    { src: "/temari.png", name: "Temari", role: "member" },
-    { src: "/rinami.png", name: "Rinami", role: "member" },
-    { src: "/ume.png", name: "Ume", role: "member" },
+    { src: "/obie.png", name: "Obie", role: "leader" },
+    { src: "/krisnu.png", name: "Krisnu", role: "member" },
+    { src: "/miqdad.png", name: "Miqdad", role: "member" },
+    { src: "/gabriel.png", name: "Gabriel", role: "member" },
+    { src: "/yusuf.png", name: "Yusuf", role: "member" },
 ]
 
 export default function AboutPage() {
@@ -70,7 +70,7 @@ export default function AboutPage() {
                     ))}
                 </div>
             </section>
-            <GuideSlide />
+            <GuideSlide/>
             <section className="px-4 py-10 bg-muted">
                 <div className="mx-auto max-w-6xl">
                     <h2 className="text-center text-3xl font-semibold tracking-tight text-sky-400 dark:text-emerald-600">Foco Team</h2>
