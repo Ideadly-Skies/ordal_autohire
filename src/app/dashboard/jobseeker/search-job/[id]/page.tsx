@@ -1,7 +1,5 @@
 import {
   ArrowLeft,
-  Bookmark,
-  Share2,
   MapPin,
   Briefcase,
   Clock,
@@ -18,18 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import {
-  doc,
-  getDoc,
-  addDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  increment,
-} from "@firebase/firestore";
+import { doc, getDoc } from "@firebase/firestore";
 import { db } from "@/config/firebase";
 import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";

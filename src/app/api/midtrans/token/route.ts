@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 
 // midtrans-client is CJS; require() avoids ESM issues
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 import midtransClient from "midtrans-client";
 
 export const runtime = "nodejs"; // ensure Node runtime

@@ -2,18 +2,15 @@ import { HeroHeader } from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowRight,
-  Star,
   Users,
   Briefcase,
   Target,
   Zap,
   Shield,
   TrendingUp,
-  CheckCircle,
   Quote,
 } from "lucide-react";
 import Footer from "@/components/footer";
@@ -251,9 +248,10 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  &quot;I landed 5 interviews in my first week using Ordal AutoHire&apos;s
-                  automatic application feature. The AI chatbot handled
-                  everything while I focused on interview preparation.&quot;
+                  &quot;I landed 5 interviews in my first week using Ordal
+                  AutoHire&apos;s automatic application feature. The AI chatbot
+                  handled everything while I focused on interview
+                  preparation.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -276,9 +274,10 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  &quot;The ATS checker found errors in my resume I never noticed.
-                  After fixing them, I started getting more callbacks. The Pro
-                  plan&apos;s automatic applications saved me hours every day.&quot;
+                  &quot;The ATS checker found errors in my resume I never
+                  noticed. After fixing them, I started getting more callbacks.
+                  The Pro plan&apos;s automatic applications saved me hours
+                  every day.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -301,9 +300,10 @@ export default function Home() {
               <CardContent className="p-6 space-y-4">
                 <Quote className="w-8 h-8 text-primary" />
                 <p className="text-muted-foreground italic">
-                  &quot;As a job poster, the Pro plan&apos;s candidate matching scores
-                  helped me identify the perfect candidate from 200+ applicants.
-                  The AI-computed match percentages were incredibly accurate.&quot;
+                  &quot;As a job poster, the Pro plan&apos;s candidate matching
+                  scores helped me identify the perfect candidate from 200+
+                  applicants. The AI-computed match percentages were incredibly
+                  accurate.&quot;
                 </p>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">

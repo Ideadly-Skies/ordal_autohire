@@ -1,4 +1,4 @@
-import { Briefcase } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "./logo";
 
 export default function Footer() {

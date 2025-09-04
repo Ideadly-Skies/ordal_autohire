@@ -1,7 +1,6 @@
 import ProfileContent from "@/components/profile-content";
 import ProfileSidebar from "@/components/profile-sidebar";
 import { ProfileTabs } from "@/components/profile-tabs";
-import { ProtectedRoute } from "@/components/protected-route";
 
 export default function UserDashboardPage() {
   return (

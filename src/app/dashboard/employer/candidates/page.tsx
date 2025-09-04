@@ -32,11 +32,8 @@ import {
   ChevronDown,
   Calendar,
   Users,
-  MapPin,
   Mail,
   Phone,
-  Briefcase,
-  GraduationCap,
   Star,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
