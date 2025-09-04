@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/carousel"
 import { Clock, BrainCircuit, ScrollText } from "lucide-react"
 import GuideSlide from "./guideslide";
+import { AboutHeader } from "./navbar-about";
 
 const benefits = [
     {
@@ -38,6 +39,7 @@ export default function AboutPage() {
     return (
         <main>
             <section className="relative w-full overflow-hidden">
+                <AboutHeader/>
                 <Image
                     src="/about-header.jpg" alt="About Auto-Apply"
                     width={2400} height={1000}
