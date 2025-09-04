@@ -11,6 +11,8 @@ const STEPS = [
     "/guide-about3.png",
     "/guide-about4.png",
     "/guide-about5.png",
+    "/guide-about6.png",
+    "/guide-about7.png",
 ] as const;
 
 export default function GuideSlide() {
@@ -31,8 +33,8 @@ export default function GuideSlide() {
                     <Image
                         src={STEPS[index]}
                         alt={`Step ${index + 1}`}
-                        width={500}
-                        height={300}
+                        width={1200}
+                        height={800}
                         className="w-full rounded-lg object-cover"
                     />
                 </div>
